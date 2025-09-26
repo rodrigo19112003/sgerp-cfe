@@ -54,5 +54,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/", "/cambiar-contrasenia"],
+    matcher: [
+        "/",
+        "/cambiar-contrasenia",
+        "/entregas-recepciones-pendientes",
+        "/entregas-recepciones-realizadas",
+    ],
 };

@@ -8,8 +8,8 @@ function getDefaultPageForRole(userRoles: UserRoles[]): string {
     }
 
     const DEFAULT_ROUTES_MAP = {
-        [UserRoles.WORKER]: "/",
-        [UserRoles.ZONE_MANAGER]: "/",
+        [UserRoles.WORKER]: "/entregas-recepciones-realizadas",
+        [UserRoles.ZONE_MANAGER]: "/entregas-recepciones-pendientes",
     };
 
     return DEFAULT_ROUTES_MAP[userRole];

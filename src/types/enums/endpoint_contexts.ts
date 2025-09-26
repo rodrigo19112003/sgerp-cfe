@@ -1,0 +1,3 @@
+enum EndpointContexts {}
+
+export { EndpointContexts };

@@ -1,6 +1,8 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import "tailwindcss";
+
+@theme {
+  --color-green-cfe: #008E5A;
+}
 
 :root {
   --background: #ffffff;
@@ -23,8 +25,17 @@ body {
   display: none;
 }
 
-.rotate {
-  animation: rotation 1s ease-in-out infinite;
+@keyframes pulse-logo {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.pulse-logo {
+  animation: pulse-logo 2s ease-in-out infinite;
 }
 
 .hide-scrollbar {

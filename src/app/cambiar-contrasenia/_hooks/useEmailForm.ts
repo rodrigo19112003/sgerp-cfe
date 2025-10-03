@@ -1,28 +1,28 @@
 import { HttpStatusCodes } from "@/types/enums/http";
 import { NotificationTypes } from "@/types/enums/notifications";
-import { LoginResponse } from "@/types/types/api/auth";
 import sgerpCfeAPI from "@/utils/axios";
 import { isClientErrorHTTPCode } from "@/utils/http";
 import { notify } from "@/utils/notifications";
 import { isAxiosError } from "axios";
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import Cookies from "js-cookie";
-import AuthContext from "@/contexts/auth/context";
 import { NotificationInfo } from "@/types/types/components/notifications";
 
-type UserLoginForm = {
-    employeeNumber: string;
-    password: string;
+type UserEmailForm = {
+    email: string;
 };
 
-export function useLoginForm() {
-    const { login } = useContext(AuthContext);
-    const [isLoadingLogin, setIsLoadingLogin] = useState(false);
+type UseEmailFormOptions = {
+    onSuccess: (email: string) => void;
+    onError: () => void;
+};
+
+export function useEmailForm({ onSuccess, onError }: UseEmailFormOptions) {
+    const [isLoadingSendingCodeToEmail, setIsLoadingSendingCodeToEmail] =
+        useState(false);
     const FORM_INITIAL_VALUES = useMemo(
         () => ({
-            employeeNumber: "",
-            password: "",
+            email: "",
         }),
         []
     );
@@ -35,29 +35,26 @@ export function useLoginForm() {
         defaultValues: FORM_INITIAL_VALUES,
     });
 
-    const onSubmit: SubmitHandler<UserLoginForm> = async ({
-        employeeNumber,
-        password,
-    }) => {
-        setIsLoadingLogin(true);
+    const onSubmit: SubmitHandler<UserEmailForm> = async ({ email }) => {
+        setIsLoadingSendingCodeToEmail(true);
 
-        employeeNumber = employeeNumber.trim();
-        password = password.trim();
+        email = email.trim();
 
         try {
             const requestBody = {
-                employeeNumber,
-                password,
+                email,
             };
 
-            const { data: profile } = await sgerpCfeAPI.post<LoginResponse>(
-                "/sessions",
+            await sgerpCfeAPI.post(
+                "/authentications/password-reset/request",
                 requestBody
             );
 
-            Cookies.set("token", profile.token, { expires: 1 });
-            login(profile);
+            onSuccess(email);
         } catch (error) {
+            console.log(error);
+            onError();
+
             const notificationInfo: NotificationInfo = {
                 title: "Servicio no disponible",
                 message:
@@ -70,15 +67,15 @@ export function useLoginForm() {
                 isClientErrorHTTPCode(Number(error.response?.status)) &&
                 error.response?.status !== HttpStatusCodes.TOO_MANY_REQUESTS
             ) {
-                notificationInfo.title = "Credenciales inválidas";
+                notificationInfo.title = "Email inválido";
                 notificationInfo.message =
-                    "Los datos ingresados son incorrectos, verifíquelos e intente de nuevo";
+                    "El email ingresado no se encuentra asociado a ninguna cuenta, verifíquelo e ingréselo de nuevo";
                 notificationInfo.type = NotificationTypes.WARNING;
             }
 
             notify(notificationInfo);
         } finally {
-            setIsLoadingLogin(false);
+            setIsLoadingSendingCodeToEmail(false);
         }
     };
     const handleSubmit = submitWrapper(onSubmit);
@@ -87,6 +84,6 @@ export function useLoginForm() {
         register,
         errors,
         handleSubmit,
-        isLoadingLogin,
+        isLoadingSendingCodeToEmail,
     };
 }

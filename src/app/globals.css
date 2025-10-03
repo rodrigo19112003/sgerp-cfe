@@ -125,7 +125,7 @@ body {
     outline: 5px solid #2563EB50;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  li, h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
   }
 
@@ -139,6 +139,10 @@ body {
 
   h3 {
     @apply text-lg;
+  }
+
+  li, h4 {
+    @apply text-base;
   }
 }
 

@@ -1,28 +1,37 @@
 import { HttpStatusCodes } from "@/types/enums/http";
 import { NotificationTypes } from "@/types/enums/notifications";
-import { LoginResponse } from "@/types/types/api/auth";
 import sgerpCfeAPI from "@/utils/axios";
 import { isClientErrorHTTPCode } from "@/utils/http";
 import { notify } from "@/utils/notifications";
 import { isAxiosError } from "axios";
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import Cookies from "js-cookie";
-import AuthContext from "@/contexts/auth/context";
 import { NotificationInfo } from "@/types/types/components/notifications";
 
-type UserLoginForm = {
-    employeeNumber: string;
+type UserPasswordForm = {
     password: string;
+    passwordConfirmation: string;
 };
 
-export function useLoginForm() {
-    const { login } = useContext(AuthContext);
-    const [isLoadingLogin, setIsLoadingLogin] = useState(false);
+type UsePasswordFormOptions = {
+    email: string;
+    code: string;
+    onSuccess: (code: string) => void;
+    onError: () => void;
+};
+
+export function usePasswordForm({
+    email,
+    code,
+    onSuccess,
+    onError,
+}: UsePasswordFormOptions) {
+    const [isLoadingUpdatingPassword, setIsLoadingUpdatingPassword] =
+        useState(false);
     const FORM_INITIAL_VALUES = useMemo(
         () => ({
-            employeeNumber: "",
             password: "",
+            passwordConfirmation: "",
         }),
         []
     );
@@ -31,33 +40,41 @@ export function useLoginForm() {
         register,
         handleSubmit: submitWrapper,
         formState: { errors },
+        watch,
     } = useForm({
         defaultValues: FORM_INITIAL_VALUES,
     });
 
-    const onSubmit: SubmitHandler<UserLoginForm> = async ({
-        employeeNumber,
-        password,
-    }) => {
-        setIsLoadingLogin(true);
+    const onSubmit: SubmitHandler<UserPasswordForm> = async ({ password }) => {
+        setIsLoadingUpdatingPassword(true);
 
-        employeeNumber = employeeNumber.trim();
         password = password.trim();
 
         try {
             const requestBody = {
-                employeeNumber,
+                email,
+                code,
                 password,
             };
 
-            const { data: profile } = await sgerpCfeAPI.post<LoginResponse>(
-                "/sessions",
+            await sgerpCfeAPI.post(
+                "/authentications/password-reset/change",
                 requestBody
             );
 
-            Cookies.set("token", profile.token, { expires: 1 });
-            login(profile);
+            onSuccess(code);
+
+            const notificationInfo: NotificationInfo = {
+                title: "Contraseña cambiada correctamente",
+                message:
+                    "Ya se registró tu nueva contraseña, inicia sesión en el sistema con ella",
+                type: NotificationTypes.SUCCESS,
+            };
+
+            notify(notificationInfo);
         } catch (error) {
+            onError();
+
             const notificationInfo: NotificationInfo = {
                 title: "Servicio no disponible",
                 message:
@@ -70,15 +87,15 @@ export function useLoginForm() {
                 isClientErrorHTTPCode(Number(error.response?.status)) &&
                 error.response?.status !== HttpStatusCodes.TOO_MANY_REQUESTS
             ) {
-                notificationInfo.title = "Credenciales inválidas";
+                notificationInfo.title = "Email inválido";
                 notificationInfo.message =
-                    "Los datos ingresados son incorrectos, verifíquelos e intente de nuevo";
+                    "El email ingresado no se encuentra asociado a ninguna cuenta, verifíquelo e ingréselo de nuevo";
                 notificationInfo.type = NotificationTypes.WARNING;
             }
 
             notify(notificationInfo);
         } finally {
-            setIsLoadingLogin(false);
+            setIsLoadingUpdatingPassword(false);
         }
     };
     const handleSubmit = submitWrapper(onSubmit);
@@ -86,7 +103,8 @@ export function useLoginForm() {
     return {
         register,
         errors,
+        watch,
         handleSubmit,
-        isLoadingLogin,
+        isLoadingUpdatingPassword,
     };
 }

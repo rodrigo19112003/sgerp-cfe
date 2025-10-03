@@ -10,12 +10,12 @@ export const FormWrapper = () => {
                     priority
                     src="plain-logo.svg"
                     alt="Logo de CFE con nombre incluido"
-                    width={300}
-                    height={300}
+                    width={180}
+                    height={180}
                 />
-                <h1 className="text-green-cfe text-center">
+                <h2 className="text-green-cfe text-center">
                     SISTEMA DE GESTIÓN DE ENTREGA-RECEPCIÓN DE PUESTOS
-                </h1>
+                </h2>
             </header>
             <main>
                 <LoginForm />

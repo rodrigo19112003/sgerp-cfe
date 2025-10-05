@@ -125,6 +125,10 @@ body {
     outline: 5px solid #2563EB50;
   }
 
+  button {
+    cursor: pointer;
+  }
+
   li, h1, h2, h3, h4, h5, h6 {
     @apply font-bold;
   }

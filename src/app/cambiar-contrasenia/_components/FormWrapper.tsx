@@ -14,9 +14,9 @@ export const FormWrapper = () => {
     return (
         <>
             <header className="flex flex-col items-center">
-                <h2 className="text-green-cfe text-center">
+                <h1 className="text-green-cfe text-center">
                     CAMBIO DE CONTRASEÑA
-                </h2>
+                </h1>
             </header>
             <main>
                 <div className="mt-12">

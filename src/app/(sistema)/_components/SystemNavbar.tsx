@@ -49,10 +49,10 @@ export const SystemNavbar = () => {
                 links={
                     roles.includes(UserRoles.WORKER)
                         ? workerLinks
-                        : roles.includes(UserRoles.ZONE_MANAGER)
-                        ? zoneManagerLinks
                         : roles.includes(UserRoles.ADMINISTRATOR)
                         ? adminLinks
+                        : roles.includes(UserRoles.ZONE_MANAGER)
+                        ? zoneManagerLinks
                         : []
                 }
             />

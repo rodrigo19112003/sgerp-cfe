@@ -1,6 +1,6 @@
 const EMPLOYEE_NUMBER_PATTERN = new RegExp("^[A-Z0-9]{5}$");
 
-const EMAIL_PATTERN = new RegExp("^[a-zA-Z0-9._%+-]+@gmail\\.com$");
+const EMAIL_PATTERN = new RegExp("^[a-zA-Z0-9._%+-]+@(cfe.mx|gmail.com)$");
 
 const VALIDATION_CODE_PATTERN = new RegExp("^[A-Z0-9]{6}$");
 

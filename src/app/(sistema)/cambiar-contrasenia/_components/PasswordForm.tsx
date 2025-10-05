@@ -28,7 +28,7 @@ export const PasswordForm = ({
     const password = watch("password");
     return (
         <form onSubmit={handleSubmit}>
-            <h4>Deberá tener:</h4>
+            <h4 className="mt-5">Deberá tener:</h4>
             <ul>
                 <li>Entre 8 y 16 caracteres</li>
                 <li>Al menos una letra mayúscula</li>

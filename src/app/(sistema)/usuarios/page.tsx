@@ -1,7 +1,5 @@
 import { Metadata } from "next";
-import { PrimaryButton } from "@/components/buttons/PrimaryButton";
-import { UsersListWrapper } from "./_components/UsersListWrapper";
-import Link from "next/link";
+import { UsersSection } from "./_components/UsersSection";
 
 export const metadata: Metadata = {
     title: "Usuarios",
@@ -15,14 +13,7 @@ export default function UsersPage() {
                     Usuarios en el sistema
                 </h1>
             </header>
-            <section className="col-start-4 mt-4 col-span-1 flex justify-end md:col-span-4">
-                <Link href="usuarios/nuevo">
-                    <PrimaryButton>Registrar usuario</PrimaryButton>
-                </Link>
-            </section>
-            <section className="col-start-1 col-span-4 mt-2">
-                <UsersListWrapper />
-            </section>
+            <UsersSection />
         </div>
     );
 }

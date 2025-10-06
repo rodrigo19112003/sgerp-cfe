@@ -7,8 +7,13 @@ import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { useRouter } from "next/navigation";
 import { User } from "@/types/types/model/users";
 
-export const UsersListWrapper = () => {
-    const { users, deleteUser } = useUsers();
+type UsersListWrapperProps = {
+    searchQuery: string;
+};
+
+export const UsersListWrapper = ({ searchQuery }: UsersListWrapperProps) => {
+    const { usersList, bottomOfUsersListRef, deleteUser } =
+        useUsers(searchQuery);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const router = useRouter();
@@ -38,9 +43,9 @@ export const UsersListWrapper = () => {
         setUserToDelete(null);
     }, []);
 
-    return !users.error ? (
-        !users.loading ? (
-            users.value!.length > 0 ? (
+    return !usersList.error ? (
+        !usersList.loading ? (
+            usersList.value!.length > 0 ? (
                 <>
                     <ul className="grid grid-cols-4 gap-4 sm:gap-6 lg:gap-8 bg-gray-300 p-4 border border-slate-500 text-xs sm:text-sm md:text-xs lg:text-lg">
                         <li className="flex justify-center items-center">
@@ -66,10 +71,11 @@ export const UsersListWrapper = () => {
                     </ul>
 
                     <Users
-                        users={users.value}
+                        users={usersList.value}
                         onDelete={handleDelete}
                         onModify={handleModdify}
                     />
+                    <div ref={bottomOfUsersListRef} className="h-8"></div>
                     <ConfirmationModal
                         title="Eliminación del usuario"
                         message={
@@ -87,8 +93,7 @@ export const UsersListWrapper = () => {
             ) : (
                 <div className="flex justify-center items-center h-full">
                     <p className="text-center mt-36 text-2xl gap-8">
-                        No existen usuarios registrados, <br />
-                        deberá registrar uno nuevo
+                        No se encontraron resultados en la búsqueda
                     </p>
                 </div>
             )
@@ -107,7 +112,7 @@ export const UsersListWrapper = () => {
                     alt: "Imagen representativa de usuarios no encontrados",
                 }}
                 title={"¡Error al cargar los usuarios!"}
-                message={users.error}
+                message={usersList.error}
             />
         </div>
     );

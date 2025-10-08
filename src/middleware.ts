@@ -59,5 +59,7 @@ export const config = {
         "/cambiar-contrasenia",
         "/entregas-recepciones-pendientes",
         "/entregas-recepciones-realizadas",
+        "/usuarios",
+        "/usuarios/nuevo",
     ],
 };

@@ -1,0 +1,17 @@
+"use client";
+import { UserRegistrationForm } from "./UserRegistrationForm";
+
+export const FormWrapper = () => {
+    return (
+        <>
+            <header className="flex flex-col items-center">
+                <h1 className="text-green-cfe text-center">
+                    REGISTRAR USUARIO
+                </h1>
+            </header>
+            <main>
+                <UserRegistrationForm />
+            </main>
+        </>
+    );
+};

@@ -8,7 +8,7 @@ export const UsersSection = () => {
     return (
         <>
             <section className="col-start-4 mt-4 col-span-1 flex justify-end md:col-span-4">
-                <Link href="usuarios/nuevo">
+                <Link href="/usuarios/nuevo">
                     <PrimaryButton>Registrar usuario</PrimaryButton>
                 </Link>
             </section>

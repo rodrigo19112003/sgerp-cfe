@@ -13,7 +13,7 @@ export const LoginForm = () => {
                     errors.employeeNumber ? "invalid" : ""
                 }`}
             >
-                <label htmlFor="employeeNumber">RTT o RPE</label>
+                <label htmlFor="employeeNumber">RPE/RTT</label>
                 <input
                     {...register("employeeNumber", {
                         required: true,

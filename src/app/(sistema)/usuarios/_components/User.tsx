@@ -1,8 +1,9 @@
 "use client";
 import { User } from "@/types/types/model/users";
 import UserRoles from "@/types/enums/user_roles";
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
+import AuthContext from "@/contexts/auth/context";
 
 type UsersProps = {
     users: {
@@ -17,6 +18,7 @@ type UsersProps = {
 };
 
 export const Users: FC<UsersProps> = ({ users, onDelete, onModify }) => {
+    const profile = useContext(AuthContext);
     return (
         <>
             {users.map((user) => (
@@ -36,7 +38,16 @@ export const Users: FC<UsersProps> = ({ users, onDelete, onModify }) => {
                     </li>
                     <li className="flex justify-center items-center">
                         <button
-                            className="flex items-center justify-center text-gray-800 hover:text-red-500"
+                            className={`${
+                                profile.userProfile?.employeeNumber !==
+                                user.employeeNumber
+                                    ? "text-gray-800 hover:text-red-500"
+                                    : ""
+                            }flex items-center justify-center `}
+                            disabled={
+                                profile.userProfile?.employeeNumber ===
+                                user?.employeeNumber
+                            }
                             onClick={() => onDelete(user)}
                         >
                             <FaTrashAlt />
@@ -44,7 +55,16 @@ export const Users: FC<UsersProps> = ({ users, onDelete, onModify }) => {
                     </li>
                     <li className="flex justify-center items-center">
                         <button
-                            className="flex items-center justify-center text-gray-800 hover:text-red-500"
+                            className={`${
+                                profile.userProfile?.employeeNumber !==
+                                user.employeeNumber
+                                    ? "text-gray-800 hover:text-red-500"
+                                    : ""
+                            }flex items-center justify-center `}
+                            disabled={
+                                profile.userProfile?.employeeNumber ===
+                                user?.employeeNumber
+                            }
                             onClick={() => onModify(user)}
                         >
                             <FaEdit />

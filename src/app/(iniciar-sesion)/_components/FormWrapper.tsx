@@ -13,9 +13,9 @@ export const FormWrapper = () => {
                     width={180}
                     height={180}
                 />
-                <h2 className="text-green-cfe text-center">
+                <h1 className="text-green-cfe text-center">
                     SISTEMA DE GESTIÓN DE ENTREGA-RECEPCIÓN DE PUESTOS
-                </h2>
+                </h1>
             </header>
             <main>
                 <LoginForm />

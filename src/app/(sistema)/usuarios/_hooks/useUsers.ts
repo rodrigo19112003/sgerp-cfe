@@ -9,6 +9,7 @@ import { notify } from "@/utils/notifications";
 import { User } from "@/types/types/model/users";
 import { DeleteUserErrorCodes } from "@/types/enums/error_codes";
 import { UsersResponse } from "@/types/types/api/users";
+import { useSearchParams } from "next/navigation";
 
 type UsersListState = {
     loading: boolean;
@@ -24,18 +25,15 @@ const INITIAL_USERS_LIST_STATE: UsersListState = {
     stillUsersToLoad: true,
 };
 
-export function useUsers(searchQuery: string) {
+export function useUsers() {
+    const searchParams = useSearchParams();
     const [usersList, setUsersList] = useState<UsersListState>(
         INITIAL_USERS_LIST_STATE
     );
+    const savedScrollRef = useRef<number>(0);
     const bottomOfUsersListRef = useRef<HTMLDivElement | null>(null);
 
-    const usersListRef = useRef(usersList);
     const inFlightRef = useRef(false);
-
-    useEffect(() => {
-        usersListRef.current = usersList;
-    }, [usersList]);
 
     const startUsersLoading = useCallback(() => {
         setUsersList((prev) => ({ ...prev, loading: true, error: null }));
@@ -65,9 +63,14 @@ export function useUsers(searchQuery: string) {
     }, []);
 
     const loadUsers = useCallback(
-        async (usersBatchSize: number, totalUsersToOmit: number) => {
+        async (
+            usersBatchSize: number,
+            totalUsersToOmit: number,
+            searchQuery: string
+        ) => {
             if (inFlightRef.current) return;
             inFlightRef.current = true;
+            savedScrollRef.current = window.scrollY;
 
             startUsersLoading();
             try {
@@ -78,6 +81,8 @@ export function useUsers(searchQuery: string) {
                 } = { limit: usersBatchSize };
                 if (totalUsersToOmit > 0) params.offset = totalUsersToOmit;
                 if (searchQuery) params.query = searchQuery;
+
+                console.log(params);
 
                 const { data: users } = await sgerpCfeAPI.get<UsersResponse>(
                     "/users",
@@ -102,32 +107,29 @@ export function useUsers(searchQuery: string) {
                 inFlightRef.current = false;
             }
         },
-        [
-            startUsersLoading,
-            finishUsersLoading,
-            fireErrorLoadingUsers,
-            searchQuery,
-        ]
+        [startUsersLoading, finishUsersLoading, fireErrorLoadingUsers]
     );
 
     useEffect(() => {
+        const searchQuery = searchParams.get("busqueda") || "";
         if (searchQuery === undefined || searchQuery === null) return;
 
         setUsersList(INITIAL_USERS_LIST_STATE);
-        loadUsers(12, 0);
-    }, [searchQuery, loadUsers]);
+        loadUsers(12, 0, searchQuery);
+    }, [loadUsers, searchParams]);
 
     useEffect(() => {
+        const searchQuery = searchParams.get("busqueda") || "";
         if (usersList.value.length === 0) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (
                     entry.isIntersecting &&
-                    !usersListRef.current.loading &&
-                    usersListRef.current.stillUsersToLoad
+                    !usersList.loading &&
+                    usersList.stillUsersToLoad
                 ) {
-                    loadUsers(12, usersListRef.current.value.length);
+                    loadUsers(12, usersList.value.length, searchQuery);
                 }
             },
             { rootMargin: "0px", threshold: 0.1 }
@@ -137,7 +139,20 @@ export function useUsers(searchQuery: string) {
         if (target) observer.observe(target);
 
         return () => observer.disconnect();
-    }, [usersList.value.length, loadUsers]);
+    }, [
+        usersList.value.length,
+        loadUsers,
+        searchParams,
+        usersList.loading,
+        usersList.stillUsersToLoad,
+    ]);
+
+    useEffect(() => {
+        if (savedScrollRef.current > 0) {
+            window.scrollTo(0, savedScrollRef.current);
+            savedScrollRef.current = 0;
+        }
+    }, [usersList.value.length]);
 
     const deleteUser = useCallback(async (id: number) => {
         try {

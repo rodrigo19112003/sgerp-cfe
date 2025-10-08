@@ -1,6 +1,5 @@
 "use client";
 import { IconButton } from "@/components/buttons/IconButton";
-import { useParam } from "@/hooks/useParam";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
     ChangeEventHandler,
@@ -21,8 +20,8 @@ export const Searchbar = ({
 }: SearchbarProps) => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { paramValue: searchParam } = useParam("busqueda", "");
     const [searchQuery, setSearchQuery] = useState("");
+    const searchParam = searchParams.get("busqueda") || "";
 
     const handleSearchQueryChange: ChangeEventHandler<HTMLInputElement> = (
         e

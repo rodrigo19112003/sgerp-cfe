@@ -25,7 +25,7 @@ export const SystemNavbar = () => {
         () => [
             {
                 label: "Entregas-Recepciones pendientes",
-                route: "/entregas-recepciones-realizadas",
+                route: "/entregas-recepciones-pendientes",
             },
             {
                 label: "Entregas-Recepciones en proceso",

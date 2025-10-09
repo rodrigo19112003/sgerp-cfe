@@ -5,11 +5,11 @@ export const FormWrapper = () => {
         <>
             <header className="flex flex-col items-center">
                 <h1 className="text-green-cfe text-center">
-                    REGISTRAR USUARIO
+                    MODIFICAR USUARIO
                 </h1>
             </header>
             <main>
-                <UserForm />
+                <UserForm isEdition={true} />
             </main>
         </>
     );

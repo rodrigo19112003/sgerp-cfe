@@ -1,6 +1,10 @@
 const GUEST_ROUTES: (string | RegExp)[] = ["/", "/cambiar-contrasenia"];
 
-const ADMIN_ROUTES: (string | RegExp)[] = ["/usuarios", "/usuarios/nuevo"];
+const ADMIN_ROUTES: (string | RegExp)[] = [
+    "/usuarios",
+    "/usuarios/nuevo",
+    /^\/usuarios\/edicion\/[^/]+$/,
+];
 
 const WORKER_ROUTES: (string | RegExp)[] = ["/entregas-recepciones-realizadas"];
 

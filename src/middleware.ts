@@ -61,5 +61,6 @@ export const config = {
         "/entregas-recepciones-realizadas",
         "/usuarios",
         "/usuarios/nuevo",
+        "/usuarios/edicion/[employeeNumber]",
     ],
 };

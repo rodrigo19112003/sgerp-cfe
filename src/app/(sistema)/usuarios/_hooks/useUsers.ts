@@ -82,8 +82,6 @@ export function useUsers() {
                 if (totalUsersToOmit > 0) params.offset = totalUsersToOmit;
                 if (searchQuery) params.query = searchQuery;
 
-                console.log(params);
-
                 const { data: users } = await sgerpCfeAPI.get<UsersResponse>(
                     "/users",
                     { params }
@@ -161,6 +159,13 @@ export function useUsers() {
                 ...prev,
                 value: prev.value.filter((u) => u.id !== id),
             }));
+            const notificationInfo: NotificationInfo = {
+                title: "Usuario eliminado correctamente",
+                message:
+                    "El usuario se eliminó correctamente del sistema y se le envió un correo notificándole",
+                type: NotificationTypes.SUCCESS,
+            };
+            notify(notificationInfo);
         } catch (error) {
             const notificationInfo: NotificationInfo = {
                 title: "Servicio no disponible",

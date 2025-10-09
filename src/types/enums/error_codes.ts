@@ -10,6 +10,7 @@ enum CreateOrUpdateUserErrorCodes {
         "-400002",
     EMPLOYEE_NUMBER_ALREADY_EXIST = EndpointContexts.CREATE_UPDATE_USER +
         "-400003",
+    EMAIL_ALREADY_EXIST = EndpointContexts.CREATE_UPDATE_USER + "-400004",
     USER_NOT_FOUND = EndpointContexts.CREATE_UPDATE_USER + "-400005",
 }
 

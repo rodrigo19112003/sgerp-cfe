@@ -232,6 +232,16 @@ export function useUserForm({ isEdition, employeeNumber }: UseUserFormProps) {
                 }
                 if (
                     error.response?.data?.errorCode ===
+                    CreateOrUpdateUserErrorCodes.EMAIL_ALREADY_EXIST
+                ) {
+                    notificationInfo.title =
+                        "Ya existe un usuario con el mismo correo electrónico";
+                    notificationInfo.message =
+                        "No es posible registrar más de un usuario con el mismo correo electrónico, ya que este es único";
+                    notificationInfo.type = NotificationTypes.ERROR;
+                }
+                if (
+                    error.response?.data?.errorCode ===
                     CreateOrUpdateUserErrorCodes.USER_NOT_FOUND
                 ) {
                     notificationInfo.title = "No se encontró el usuario";

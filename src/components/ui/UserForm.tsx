@@ -111,6 +111,7 @@ export const UserForm = ({ isEdition }: UserFormProps) => {
                         })}
                         id="email"
                         type="text"
+                        disabled={isEdition}
                     />
                     <p className="error">Correo electrónico inválido</p>
                 </div>

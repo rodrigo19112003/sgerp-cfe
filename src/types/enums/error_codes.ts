@@ -14,4 +14,13 @@ enum CreateOrUpdateUserErrorCodes {
     USER_NOT_FOUND = EndpointContexts.CREATE_UPDATE_USER + "-400005",
 }
 
-export { DeleteUserErrorCodes, CreateOrUpdateUserErrorCodes };
+enum DeleteDeliveryReceptionMadeErrorCodes {
+    DELIVERY_RECEPTION_MADE_NOT_FOUND = EndpointContexts.DELETE_DELIVERY_RECEPTION_MADE +
+        "-400001",
+}
+
+export {
+    DeleteUserErrorCodes,
+    CreateOrUpdateUserErrorCodes,
+    DeleteDeliveryReceptionMadeErrorCodes,
+};

@@ -9,7 +9,7 @@ export const FormWrapper = () => {
                 </h1>
             </header>
             <main>
-                <UserForm />
+                <UserForm isEdition={false} />
             </main>
         </>
     );

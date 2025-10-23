@@ -1,10 +1,13 @@
-import DeliveryReceptionStatusCodes from "@/types/enums/delivery_reception_status_codes";
+import { DeliveryReceptionStatusCodes } from "@/types/enums/delivery_reception_status_codes";
 
-type DeliveryReceptionMade = {
+type DeliveryReception = {
     id: number;
     status: DeliveryReceptionStatusCodes;
-    employeeNumberReceiver: string;
-    fullNameReceiver: string;
+    employeeNumberReceiver?: string;
+    fullNameReceiver?: string;
+    employeeNumberMaker?: string;
+    fullNameMaker?: string;
+    deliveryReceptionId: number;
 };
 
-export type { DeliveryReceptionMade };
+export type { DeliveryReception };

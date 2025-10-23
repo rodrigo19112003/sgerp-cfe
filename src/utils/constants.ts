@@ -6,10 +6,15 @@ const ADMIN_ROUTES: (string | RegExp)[] = [
     /^\/usuarios\/edicion\/[^/]+$/,
 ];
 
-const WORKER_ROUTES: (string | RegExp)[] = ["/entregas-recepciones-realizadas"];
+const WORKER_ROUTES: (string | RegExp)[] = [
+    "/entregas-recepciones-realizadas",
+    "/entregas-recepciones-recibidas",
+];
 
 const ZONE_MANAGER_ROUTES: (string | RegExp)[] = [
     "/entregas-recepciones-pendientes",
+    "/entregas-receptiones-en-proceso",
+    "/entregas-recepciones-liberadas",
 ];
 
 const WITNESS_ROUTES: (string | RegExp)[] = ["/"];

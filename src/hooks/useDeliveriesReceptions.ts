@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import sgerpCfeAPI from "@/utils/axios";
 import { NotificationInfo } from "@/types/types/components/notifications";
 import { NotificationTypes } from "@/types/enums/notifications";
@@ -6,64 +6,76 @@ import { isAxiosError } from "axios";
 import { isClientErrorHTTPCode } from "@/utils/http";
 import { HttpStatusCodes } from "@/types/enums/http";
 import { notify } from "@/utils/notifications";
-import { DeliveryReceptionMade } from "@/types/types/model/deliveries_receptions";
-import { DeliveriesReceptionsMadeResponse } from "@/types/types/api/deliveries_receptions_made";
+import { DeliveryReception } from "@/types/types/model/deliveries_receptions";
+import { DeliveriesReceptionsResponse } from "@/types/types/api/deliveries_receptions";
 import { useSearchParams } from "next/navigation";
 import { DeleteDeliveryReceptionMadeErrorCodes } from "@/types/enums/error_codes";
+import AuthContext from "@/contexts/auth/context";
+import UserRoles from "@/types/enums/user_roles";
+import DeliveryReceptionStatusCodes from "@/types/enums/delivery_reception_status_codes";
 
-type DeliveriesReceptionsMadeListState = {
+interface DeliveriesReceptionsProps {
+    deliveriesReceptionsAreMade: boolean;
+    deliveryReceptionStatus?: DeliveryReceptionStatusCodes;
+}
+
+type DeliveriesReceptionsListState = {
     loading: boolean;
-    value: DeliveryReceptionMade[];
+    value: DeliveryReception[];
     error: null | string;
-    stillDeliveriesReceptionsMadeToLoad: boolean;
+    stillDeliveriesReceptionsToLoad: boolean;
 };
 
-const INITIAL_DELIVERIES_RECEPTIONS_MADE_LIST_STATE: DeliveriesReceptionsMadeListState =
+const INITIAL_DELIVERIES_RECEPTIONS_LIST_STATE: DeliveriesReceptionsListState =
     {
         loading: false,
         value: [],
         error: null,
-        stillDeliveriesReceptionsMadeToLoad: true,
+        stillDeliveriesReceptionsToLoad: true,
     };
 
-export function useDeliveriesReceptionsMade() {
+export function useDeliveriesReceptions({
+    deliveriesReceptionsAreMade,
+    deliveryReceptionStatus,
+}: DeliveriesReceptionsProps) {
     const searchParams = useSearchParams();
-    const [deliveriesReceptionsMadeList, setDeliveriesReceptionsMadeList] =
-        useState<DeliveriesReceptionsMadeListState>(
-            INITIAL_DELIVERIES_RECEPTIONS_MADE_LIST_STATE
+    const [deliveriesReceptionsList, setDeliveriesReceptionsList] =
+        useState<DeliveriesReceptionsListState>(
+            INITIAL_DELIVERIES_RECEPTIONS_LIST_STATE
         );
     const savedScrollRef = useRef<number>(0);
-    const bottomOfDeliveriesReceptionsMadeListRef =
-        useRef<HTMLDivElement | null>(null);
-
+    const bottomOfDeliveriesReceptionsListRef = useRef<HTMLDivElement | null>(
+        null
+    );
+    const profile = useContext(AuthContext);
     const inFlightRef = useRef(false);
 
-    const startDeliveriesReceptionsMadeLoading = useCallback(() => {
-        setDeliveriesReceptionsMadeList((prev) => ({
+    const startDeliveriesReceptionsLoading = useCallback(() => {
+        setDeliveriesReceptionsList((prev) => ({
             ...prev,
             loading: true,
             error: null,
         }));
     }, []);
 
-    const finishDeliveriesReceptionsMadeLoading = useCallback(
+    const finishDeliveriesReceptionsLoading = useCallback(
         (
-            deliveriesReceptionsMade: DeliveryReceptionMade[],
-            stillDeliveriesReceptionsMadeToLoad: boolean
+            deliveriesReceptions: DeliveryReception[],
+            stillDeliveriesReceptionsToLoad: boolean
         ) => {
-            setDeliveriesReceptionsMadeList((prev) => ({
+            setDeliveriesReceptionsList((prev) => ({
                 loading: false,
-                value: [...prev.value, ...deliveriesReceptionsMade],
+                value: [...prev.value, ...deliveriesReceptions],
                 error: null,
-                stillDeliveriesReceptionsMadeToLoad,
+                stillDeliveriesReceptionsToLoad,
             }));
         },
         []
     );
 
-    const fireErrorLoadingDeliveriesReceptionsMade = useCallback(
+    const fireErrorLoadingDeliveriesReceptions = useCallback(
         (message?: string) => {
-            setDeliveriesReceptionsMadeList((prev) => ({
+            setDeliveriesReceptionsList((prev) => ({
                 ...prev,
                 loading: false,
                 error:
@@ -75,38 +87,56 @@ export function useDeliveriesReceptionsMade() {
         []
     );
 
-    const loadDeliveriesReceptionsMade = useCallback(
+    const loadDeliveriesReceptions = useCallback(
         async (
-            deliveriesReceptionsMadeBatchSize: number,
-            totalDeliveriesReceptionsMadeToOmit: number,
+            deliveriesReceptionsBatchSize: number,
+            totalDeliveriesReceptionsToOmit: number,
             searchQuery: string
         ) => {
             if (inFlightRef.current) return;
             inFlightRef.current = true;
             savedScrollRef.current = window.scrollY;
 
-            startDeliveriesReceptionsMadeLoading();
+            startDeliveriesReceptionsLoading();
             try {
                 const params: {
                     limit: number;
                     offset?: number;
                     query?: string;
-                } = { limit: deliveriesReceptionsMadeBatchSize };
-                if (totalDeliveriesReceptionsMadeToOmit > 0)
-                    params.offset = totalDeliveriesReceptionsMadeToOmit;
+                } = { limit: deliveriesReceptionsBatchSize };
+                if (totalDeliveriesReceptionsToOmit > 0)
+                    params.offset = totalDeliveriesReceptionsToOmit;
                 if (searchQuery) params.query = searchQuery;
 
-                const { data: users } =
-                    await sgerpCfeAPI.get<DeliveriesReceptionsMadeResponse>(
-                        "/deliveries-receptions/made",
+                let basePath: string = "";
+
+                if (profile.roles.includes(UserRoles.WORKER)) {
+                    basePath = deliveriesReceptionsAreMade
+                        ? "deliveries-receptions/made"
+                        : "deliveries-receptions/received";
+                } else if (profile.roles.includes(UserRoles.ZONE_MANAGER)) {
+                    switch (deliveryReceptionStatus) {
+                        case DeliveryReceptionStatusCodes.PENDING:
+                            basePath = "deliveries-receptions/pending";
+                        case DeliveryReceptionStatusCodes.IN_PROCESS:
+                            basePath = "deliveries-receptions/in-process";
+                        default:
+                            basePath = "deliveries-receptions/released";
+                    }
+                }
+
+                const { data: deliveriesReceptions } =
+                    await sgerpCfeAPI.get<DeliveriesReceptionsResponse>(
+                        basePath,
                         { params }
                     );
 
-                const stillDeliveriesReceptionsMadeToLoad =
-                    users.length >= deliveriesReceptionsMadeBatchSize;
-                finishDeliveriesReceptionsMadeLoading(
-                    users,
-                    stillDeliveriesReceptionsMadeToLoad
+                const stillDeliveriesReceptionsToLoad =
+                    deliveriesReceptions.length >=
+                    deliveriesReceptionsBatchSize;
+                finishDeliveriesReceptionsLoading(
+                    deliveriesReceptions,
+                    stillDeliveriesReceptionsToLoad
                 );
             } catch (error) {
                 let message =
@@ -119,15 +149,18 @@ export function useDeliveriesReceptionsMade() {
                     message =
                         "No se pudieron obtener las Entregas-Recepciones realizadas porque el trabajador no se pudo identificar";
                 }
-                fireErrorLoadingDeliveriesReceptionsMade(message);
+                fireErrorLoadingDeliveriesReceptions(message);
             } finally {
                 inFlightRef.current = false;
             }
         },
         [
-            startDeliveriesReceptionsMadeLoading,
-            finishDeliveriesReceptionsMadeLoading,
-            fireErrorLoadingDeliveriesReceptionsMade,
+            deliveriesReceptionsAreMade,
+            profile.roles,
+            deliveryReceptionStatus,
+            startDeliveriesReceptionsLoading,
+            finishDeliveriesReceptionsLoading,
+            fireErrorLoadingDeliveriesReceptions,
         ]
     );
 
@@ -135,26 +168,24 @@ export function useDeliveriesReceptionsMade() {
         const searchQuery = searchParams.get("busqueda") || "";
         if (searchQuery === undefined || searchQuery === null) return;
 
-        setDeliveriesReceptionsMadeList(
-            INITIAL_DELIVERIES_RECEPTIONS_MADE_LIST_STATE
-        );
-        loadDeliveriesReceptionsMade(12, 0, searchQuery);
-    }, [loadDeliveriesReceptionsMade, searchParams]);
+        setDeliveriesReceptionsList(INITIAL_DELIVERIES_RECEPTIONS_LIST_STATE);
+        loadDeliveriesReceptions(12, 0, searchQuery);
+    }, [loadDeliveriesReceptions, searchParams]);
 
     useEffect(() => {
         const searchQuery = searchParams.get("busqueda") || "";
-        if (deliveriesReceptionsMadeList.value.length === 0) return;
+        if (deliveriesReceptionsList.value.length === 0) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (
                     entry.isIntersecting &&
-                    !deliveriesReceptionsMadeList.loading &&
-                    deliveriesReceptionsMadeList.stillDeliveriesReceptionsMadeToLoad
+                    !deliveriesReceptionsList.loading &&
+                    deliveriesReceptionsList.stillDeliveriesReceptionsToLoad
                 ) {
-                    loadDeliveriesReceptionsMade(
+                    loadDeliveriesReceptions(
                         12,
-                        deliveriesReceptionsMadeList.value.length,
+                        deliveriesReceptionsList.value.length,
                         searchQuery
                     );
                 }
@@ -162,16 +193,16 @@ export function useDeliveriesReceptionsMade() {
             { rootMargin: "0px", threshold: 0.1 }
         );
 
-        const target = bottomOfDeliveriesReceptionsMadeListRef.current;
+        const target = bottomOfDeliveriesReceptionsListRef.current;
         if (target) observer.observe(target);
 
         return () => observer.disconnect();
     }, [
-        deliveriesReceptionsMadeList.value.length,
-        loadDeliveriesReceptionsMade,
+        deliveriesReceptionsList.value.length,
+        loadDeliveriesReceptions,
         searchParams,
-        deliveriesReceptionsMadeList.loading,
-        deliveriesReceptionsMadeList.stillDeliveriesReceptionsMadeToLoad,
+        deliveriesReceptionsList.loading,
+        deliveriesReceptionsList.stillDeliveriesReceptionsToLoad,
     ]);
 
     useEffect(() => {
@@ -179,12 +210,12 @@ export function useDeliveriesReceptionsMade() {
             window.scrollTo(0, savedScrollRef.current);
             savedScrollRef.current = 0;
         }
-    }, [deliveriesReceptionsMadeList.value.length]);
+    }, [deliveriesReceptionsList.value.length]);
 
     const deleteDeliveryReceptionMade = useCallback(async (id: number) => {
         try {
             await sgerpCfeAPI.delete(`/deliveries-receptions/made/${id}`);
-            setDeliveriesReceptionsMadeList((prev) => ({
+            setDeliveriesReceptionsList((prev) => ({
                 ...prev,
                 value: prev.value.filter((u) => u.id !== id),
             }));
@@ -223,8 +254,8 @@ export function useDeliveriesReceptionsMade() {
     }, []);
 
     return {
-        deliveriesReceptionsMadeList,
-        bottomOfDeliveriesReceptionsMadeListRef,
+        deliveriesReceptionsList,
+        bottomOfDeliveriesReceptionsListRef,
         deleteDeliveryReceptionMade,
     };
 }

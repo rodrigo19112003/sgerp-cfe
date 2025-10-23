@@ -1,34 +1,82 @@
 "use client";
-import { useCallback, useState } from "react";
-import { useDeliveriesReceptionsMade } from "../_hooks/useDeliveriesReceptionsMade";
-import { DeliveriesReceptionsMade } from "./DeliveryReceptionMade";
+import { useCallback, useContext, useState } from "react";
+import { DeliveriesReceptions } from "./DeliveryReception";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { ErrorBanner } from "@/components/ui/ErrorBanner";
 import { useRouter } from "next/navigation";
-import { DeliveryReceptionMade } from "@/types/types/model/deliveries_receptions";
+import { DeliveryReception } from "@/types/types/model/deliveries_receptions";
+import AuthContext from "@/contexts/auth/context";
+import UserRoles from "@/types/enums/user_roles";
+import DeliveryReceptionStatusCodes from "@/types/enums/delivery_reception_status_codes";
+import { useDeliveriesReceptions } from "@/hooks/useDeliveriesReceptions";
 
-export const DeliveriesReceptionsMadeListWrapper = () => {
+interface DeliveriesReceptionsProps {
+    deliveriesReceptionsAreMade: boolean;
+    deliveryReceptionStatus?: DeliveryReceptionStatusCodes;
+}
+
+export const DeliveriesReceptionsListWrapper = ({
+    deliveriesReceptionsAreMade,
+    deliveryReceptionStatus,
+}: DeliveriesReceptionsProps) => {
     const {
-        deliveriesReceptionsMadeList,
-        bottomOfDeliveriesReceptionsMadeListRef,
+        deliveriesReceptionsList,
+        bottomOfDeliveriesReceptionsListRef,
         deleteDeliveryReceptionMade,
-    } = useDeliveriesReceptionsMade();
+    } = useDeliveriesReceptions({
+        deliveriesReceptionsAreMade,
+        deliveryReceptionStatus,
+    });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [deliveryReceptionMadeToDelete, setDeliveryReceptionMadeToDelete] =
-        useState<DeliveryReceptionMade | null>(null);
+        useState<DeliveryReception | null>(null);
+    const profile = useContext(AuthContext);
     const router = useRouter();
 
-    const handleModdify = useCallback(
-        (deliveryReceptionMade: DeliveryReceptionMade) => {
-            router.push(
-                `/entregas-recepciones-realizadas/edicion/${deliveryReceptionMade.id}`
-            );
+    const handleViewOrModdify = useCallback(
+        (deliveryReception: DeliveryReception) => {
+            if (profile.roles.includes(UserRoles.WORKER)) {
+                if (deliveriesReceptionsAreMade) {
+                    const basePath = "/entregas-recepciones-realizadas";
+                    const path =
+                        deliveryReception.status ===
+                        DeliveryReceptionStatusCodes.PENDING
+                            ? `${basePath}/edicion/${deliveryReception.deliveryReceptionId}`
+                            : `${basePath}/${deliveryReception.deliveryReceptionId}`;
+                    router.push(path);
+                    return;
+                }
+
+                router.push(
+                    `/entregas-recepciones-recibidas/${deliveryReception.deliveryReceptionId}`
+                );
+                return;
+            }
+
+            if (profile.roles.includes(UserRoles.ZONE_MANAGER)) {
+                const { status, deliveryReceptionId } = deliveryReception;
+                let basePath = "";
+
+                switch (status) {
+                    case DeliveryReceptionStatusCodes.PENDING:
+                        basePath = "/entregas-recepciones-pendientes";
+                        break;
+                    case DeliveryReceptionStatusCodes.IN_PROCESS:
+                        basePath = "/entregas-recepciones-en-proceso";
+                        break;
+                    default:
+                        basePath = "/entregas-recepciones-liberadas";
+                        break;
+                }
+
+                router.push(`${basePath}/${deliveryReceptionId}`);
+            }
         },
-        [router]
+        [deliveriesReceptionsAreMade, profile.roles, router]
     );
 
     const handleDelete = useCallback(
-        (deliveryReceptionMade: DeliveryReceptionMade) => {
+        (deliveryReceptionMade: DeliveryReception) => {
             setDeliveryReceptionMadeToDelete(deliveryReceptionMade);
             setIsModalOpen(true);
         },
@@ -37,7 +85,9 @@ export const DeliveriesReceptionsMadeListWrapper = () => {
 
     const confirmDelete = useCallback(() => {
         if (deliveryReceptionMadeToDelete !== null) {
-            deleteDeliveryReceptionMade(deliveryReceptionMadeToDelete.id);
+            deleteDeliveryReceptionMade(
+                deliveryReceptionMadeToDelete.deliveryReceptionId
+            );
             setIsModalOpen(false);
             setDeliveryReceptionMadeToDelete(null);
         }
@@ -48,9 +98,9 @@ export const DeliveriesReceptionsMadeListWrapper = () => {
         setDeliveryReceptionMadeToDelete(null);
     }, []);
 
-    return !deliveriesReceptionsMadeList.error ? (
-        !deliveriesReceptionsMadeList.loading ? (
-            deliveriesReceptionsMadeList.value!.length > 0 ? (
+    return !deliveriesReceptionsList.error ? (
+        !deliveriesReceptionsList.loading ? (
+            deliveriesReceptionsList.value!.length > 0 ? (
                 <>
                     <ul className="grid grid-cols-4 gap-4 sm:gap-6 lg:gap-8 bg-gray-300 p-4 border border-slate-500 text-xs sm:text-sm md:text-xs lg:text-lg">
                         <li className="flex justify-center items-center">
@@ -60,7 +110,9 @@ export const DeliveriesReceptionsMadeListWrapper = () => {
                         </li>
                         <li className="flex justify-center items-center">
                             <p className="font-semibold text-gray-800 text-center">
-                                Trabajador que recibe
+                                {deliveriesReceptionsAreMade
+                                    ? "Trabajador que recibe"
+                                    : "Trabajador que realiza"}
                             </p>
                         </li>
                         <li className="flex justify-center items-center">
@@ -74,15 +126,16 @@ export const DeliveriesReceptionsMadeListWrapper = () => {
                             </p>
                         </li>
                     </ul>
-                    <DeliveriesReceptionsMade
-                        deliveriesReceptionsMade={
-                            deliveriesReceptionsMadeList.value
+                    <DeliveriesReceptions
+                        deliveriesReceptions={deliveriesReceptionsList.value}
+                        deliveriesReceptionsAreMade={
+                            deliveriesReceptionsAreMade
                         }
                         onDelete={handleDelete}
-                        onModify={handleModdify}
+                        onViewOrModify={handleViewOrModdify}
                     />
                     <div
-                        ref={bottomOfDeliveriesReceptionsMadeListRef}
+                        ref={bottomOfDeliveriesReceptionsListRef}
                         className="h-8"
                     ></div>
                     <ConfirmationModal
@@ -121,7 +174,7 @@ export const DeliveriesReceptionsMadeListWrapper = () => {
                     alt: "Imagen representativa de entregas-recepciones realizadas no encontradas",
                 }}
                 title={"¡Error al cargar las entregas-recepciones realizadas!"}
-                message={deliveriesReceptionsMadeList.error}
+                message={deliveriesReceptionsList.error}
             />
         </div>
     );

@@ -1,7 +1,9 @@
 "use client";
+import AuthContext from "@/contexts/auth/context";
 import DeliveryReceptionStatusCodes from "@/types/enums/delivery_reception_status_codes";
+import UserRoles from "@/types/enums/user_roles";
 import { DeliveryReception } from "@/types/types/model/deliveries_receptions";
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { FaTrashAlt, FaEdit, FaEye } from "react-icons/fa";
 
 type DeliveriesReceptionsProps = {
@@ -25,6 +27,7 @@ export const DeliveriesReceptions: FC<DeliveriesReceptionsProps> = ({
     onDelete,
     onViewOrModify,
 }) => {
+    const profile = useContext(AuthContext);
     return (
         <>
             {deliveriesReceptions.map((deliveryReception) => (
@@ -63,12 +66,14 @@ export const DeliveriesReceptions: FC<DeliveriesReceptionsProps> = ({
                             >
                                 <FaTrashAlt />
                             </button>
-                        ) : (
+                        ) : !profile.roles.includes(UserRoles.WORKER) ? (
                             <p className="text-xs sm:text-sm lg:text-base font-regular text-gray-800 text-center break-words">
                                 {deliveryReception.employeeNumberReceiver
                                     ? `${deliveryReception.employeeNumberReceiver} - ${deliveryReception.fullNameReceiver}`
                                     : ""}
                             </p>
+                        ) : (
+                            <></>
                         )}
                     </li>
                     <li className="flex justify-center items-center">

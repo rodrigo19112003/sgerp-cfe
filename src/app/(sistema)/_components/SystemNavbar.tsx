@@ -33,7 +33,7 @@ export const SystemNavbar = () => {
             },
             {
                 label: "Entregas-Recepciones liberadas",
-                route: "/entregas-recepciones-liberadass",
+                route: "/entregas-recepciones-liberadas",
             },
         ],
         []

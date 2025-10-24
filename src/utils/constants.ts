@@ -13,7 +13,7 @@ const WORKER_ROUTES: (string | RegExp)[] = [
 
 const ZONE_MANAGER_ROUTES: (string | RegExp)[] = [
     "/entregas-recepciones-pendientes",
-    "/entregas-receptiones-en-proceso",
+    "/entregas-recepciones-en-proceso",
     "/entregas-recepciones-liberadas",
 ];
 

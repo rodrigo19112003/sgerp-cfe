@@ -58,7 +58,7 @@ export const config = {
         "/",
         "/cambiar-contrasenia",
         "/entregas-recepciones-pendientes",
-        "/entregas-receptiones-en-proceso",
+        "/entregas-recepciones-en-proceso",
         "/entregas-recepciones-liberadas",
         "/entregas-recepciones-realizadas",
         "/entregas-recepciones-recibidas",

@@ -94,6 +94,7 @@ export function useDeliveriesReceptions({
             searchQuery: string
         ) => {
             if (inFlightRef.current) return;
+            if (profile.roles.includes(UserRoles.GUEST)) return;
             inFlightRef.current = true;
             savedScrollRef.current = window.scrollY;
 
@@ -112,16 +113,19 @@ export function useDeliveriesReceptions({
 
                 if (profile.roles.includes(UserRoles.WORKER)) {
                     basePath = deliveriesReceptionsAreMade
-                        ? "deliveries-receptions/made"
-                        : "deliveries-receptions/received";
+                        ? "/deliveries-receptions/made"
+                        : "/deliveries-receptions/received";
                 } else if (profile.roles.includes(UserRoles.ZONE_MANAGER)) {
                     switch (deliveryReceptionStatus) {
                         case DeliveryReceptionStatusCodes.PENDING:
-                            basePath = "deliveries-receptions/pending";
+                            basePath = "/deliveries-receptions/pending";
+                            break;
                         case DeliveryReceptionStatusCodes.IN_PROCESS:
-                            basePath = "deliveries-receptions/in-process";
+                            basePath = "/deliveries-receptions/in-process";
+                            break;
                         default:
-                            basePath = "deliveries-receptions/released";
+                            basePath = "/deliveries-receptions/released";
+                            break;
                     }
                 }
 
@@ -156,7 +160,7 @@ export function useDeliveriesReceptions({
         },
         [
             deliveriesReceptionsAreMade,
-            profile.roles,
+            profile,
             deliveryReceptionStatus,
             startDeliveriesReceptionsLoading,
             finishDeliveriesReceptionsLoading,

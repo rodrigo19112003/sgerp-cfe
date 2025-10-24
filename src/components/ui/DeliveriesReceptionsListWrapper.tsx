@@ -117,12 +117,18 @@ export const DeliveriesReceptionsListWrapper = ({
                         </li>
                         <li className="flex justify-center items-center">
                             <p className="font-semibold text-gray-800 text-center">
-                                Eliminar
+                                {deliveriesReceptionsAreMade
+                                    ? "Eliminar"
+                                    : profile.roles.includes(UserRoles.WORKER)
+                                    ? ""
+                                    : "Trabajador que recibe"}
                             </p>
                         </li>
                         <li className="flex justify-center items-center">
                             <p className="font-semibold text-gray-800 text-center">
-                                Visualizar/Modificar
+                                {deliveriesReceptionsAreMade
+                                    ? "Visualizar/Modificar"
+                                    : "Visualizar"}
                             </p>
                         </li>
                     </ul>

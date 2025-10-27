@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { FormWrapper } from "./_components/FormWrapper";
 
 export const metadata: Metadata = {
-    title: "Registrar Entrega-Recepción",
+    title: "Modificar Entrega-Recepción",
 };
 
 export default function UserRegistration() {

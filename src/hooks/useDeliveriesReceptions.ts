@@ -218,10 +218,10 @@ export function useDeliveriesReceptions({
 
     const deleteDeliveryReceptionMade = useCallback(async (id: number) => {
         try {
-            await sgerpCfeAPI.delete(`/deliveries-receptions/made/${id}`);
+            await sgerpCfeAPI.delete(`/deliveries-receptions/${id}`);
             setDeliveriesReceptionsList((prev) => ({
                 ...prev,
-                value: prev.value.filter((u) => u.id !== id),
+                value: prev.value.filter((u) => u.deliveryReceptionId !== id),
             }));
             const notificationInfo: NotificationInfo = {
                 title: "Entrega-Recepción eliminada correctamente",

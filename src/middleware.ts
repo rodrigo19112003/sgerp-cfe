@@ -62,6 +62,7 @@ export const config = {
         "/entregas-recepciones-liberadas",
         "/entregas-recepciones-realizadas",
         "/entregas-recepciones-realizadas/nueva",
+        "/entregas-recepciones-realizadas/edicion/[deliveryReceptionId]",
         "/entregas-recepciones-recibidas",
         "/usuarios",
         "/usuarios/nuevo",

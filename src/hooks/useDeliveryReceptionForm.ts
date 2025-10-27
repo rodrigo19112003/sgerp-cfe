@@ -29,12 +29,12 @@ type DeliveryReceptionInformationForm = {
     materialResources: string;
     areaBudgetStatus: string;
     programmaticStatus: string;
-    procedureReportFile: File | null;
-    financialResourcesFile: File | null;
-    humanResourcesFile: File | null;
-    materialResourcesFile: File | null;
-    areaBudgetStatusFile: File | null;
-    programmaticStatusFile: File | null;
+    procedureReportFile: FileList | null;
+    financialResourcesFile: FileList | null;
+    humanResourcesFile: FileList | null;
+    materialResourcesFile: FileList | null;
+    areaBudgetStatusFile: FileList | null;
+    programmaticStatusFile: FileList | null;
     employeeNumberReceiver: string;
 };
 
@@ -114,65 +114,19 @@ export function useDeliveryReceptionForm({
         });
     }, []);
 
-    const base64ToFile = (
-        base64: string,
-        fileName: string,
-        mimeType = "application/pdf"
-    ) => {
-        const byteString = atob(base64);
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        return new File([ab], fileName, { type: mimeType });
-    };
-
     const loadDeliveryReception = useCallback(async () => {
         try {
             const { data: deliveryReception } = await sgerpCfeAPI.get(
-                `/deliveries-reception/${deliveryReceptionId}`
-            );
-
-            const procedureReportFile = base64ToFile(
-                deliveryReception.procedureReportFile.content,
-                deliveryReception.procedureReportFile.name
-            );
-            const financialResourcesFile = base64ToFile(
-                deliveryReception.financialResourcesFile.content,
-                deliveryReception.financialResourcesFile.name
-            );
-            const humanResourcesFile = base64ToFile(
-                deliveryReception.humanResourcesFile.content,
-                deliveryReception.humanResourcesFile.name
-            );
-            const materialResourcesFile = base64ToFile(
-                deliveryReception.materialResourcesFile.content,
-                deliveryReception.materialResourcesFile.name
-            );
-            const areaBudgetStatusFile = base64ToFile(
-                deliveryReception.areaBudgetStatusFile.content,
-                deliveryReception.areaBudgetStatusFile.name
-            );
-            const programmaticStatusFile = base64ToFile(
-                deliveryReception.programmaticStatusFile.content,
-                deliveryReception.programmaticStatusFile.name
+                `/deliveries-receptions/${deliveryReceptionId}`
             );
 
             reset({
                 ...deliveryReception,
-                procedureReportFile: procedureReportFile,
-                financialResourcesFile: financialResourcesFile,
-                humanResourcesFile: humanResourcesFile,
-                materialResourcesFile: materialResourcesFile,
-                areaBudgetStatusFile: areaBudgetStatusFile,
-                programmaticStatusFile: programmaticStatusFile,
-                employeeNumberReceiver:
-                    deliveryReception.employeeNumberReceiver,
             });
 
             finishLoadingDeliveryReception(deliveryReception);
         } catch (error) {
+            console.log(error);
             let message =
                 "Por el momento el sistema no se encuentra disponible, por favor intente más tarde";
             if (
@@ -254,15 +208,47 @@ export function useDeliveryReceptionForm({
             areaBudgetStatusIFile,
             programmaticStatusIFile,
         ] = await Promise.all([
-            fileToBase64(procedureReportFile!, EvidenceCategories.REPORT),
-            fileToBase64(financialResourcesFile!, EvidenceCategories.FINANCE),
-            fileToBase64(humanResourcesFile!, EvidenceCategories.HUMAN),
-            fileToBase64(materialResourcesFile!, EvidenceCategories.MATERIAL),
-            fileToBase64(areaBudgetStatusFile!, EvidenceCategories.BUDGET),
-            fileToBase64(
-                programmaticStatusFile!,
-                EvidenceCategories.PROGRAMMATIC
-            ),
+            procedureReportFile?.[0] instanceof File
+                ? fileToBase64(
+                      procedureReportFile[0],
+                      EvidenceCategories.REPORT
+                  )
+                : Promise.resolve(deliveryReception.value!.procedureReportFile),
+            financialResourcesFile?.[0] instanceof File
+                ? fileToBase64(
+                      financialResourcesFile[0],
+                      EvidenceCategories.FINANCE
+                  )
+                : Promise.resolve(
+                      deliveryReception.value!.financialResourcesFile
+                  ),
+            humanResourcesFile?.[0] instanceof File
+                ? fileToBase64(humanResourcesFile[0], EvidenceCategories.HUMAN)
+                : Promise.resolve(deliveryReception.value!.humanResourcesFile),
+            materialResourcesFile?.[0] instanceof File
+                ? fileToBase64(
+                      materialResourcesFile[0],
+                      EvidenceCategories.MATERIAL
+                  )
+                : Promise.resolve(
+                      deliveryReception.value!.materialResourcesFile
+                  ),
+            areaBudgetStatusFile?.[0] instanceof File
+                ? fileToBase64(
+                      areaBudgetStatusFile[0],
+                      EvidenceCategories.BUDGET
+                  )
+                : Promise.resolve(
+                      deliveryReception.value!.areaBudgetStatusFile
+                  ),
+            programmaticStatusFile?.[0] instanceof File
+                ? fileToBase64(
+                      programmaticStatusFile[0],
+                      EvidenceCategories.PROGRAMMATIC
+                  )
+                : Promise.resolve(
+                      deliveryReception.value!.programmaticStatusFile
+                  ),
         ]);
 
         try {
@@ -276,12 +262,12 @@ export function useDeliveryReceptionForm({
                 materialResources,
                 areaBudgetStatus,
                 programmaticStatus,
-                procedureReportIFile,
-                financialResourcesIFile,
-                humanResourcesIFile,
-                materialResourcesIFile,
-                areaBudgetStatusIFile,
-                programmaticStatusIFile,
+                procedureReportFile: procedureReportIFile,
+                financialResourcesFile: financialResourcesIFile,
+                humanResourcesFile: humanResourcesIFile,
+                materialResourcesFile: materialResourcesIFile,
+                areaBudgetStatusFile: areaBudgetStatusIFile,
+                programmaticStatusFile: programmaticStatusIFile,
             };
 
             const requestBodyToUpdateDeliveryReception = {
@@ -294,12 +280,12 @@ export function useDeliveryReceptionForm({
                 materialResources,
                 areaBudgetStatus,
                 programmaticStatus,
-                procedureReportIFile,
-                financialResourcesIFile,
-                humanResourcesIFile,
-                materialResourcesIFile,
-                areaBudgetStatusIFile,
-                programmaticStatusIFile,
+                procedureReportFile: procedureReportIFile,
+                financialResourcesFile: financialResourcesIFile,
+                humanResourcesFile: humanResourcesIFile,
+                materialResourcesFile: materialResourcesIFile,
+                areaBudgetStatusFile: areaBudgetStatusIFile,
+                programmaticStatusFile: programmaticStatusIFile,
             };
 
             let notificationInfo: NotificationInfo;
@@ -333,6 +319,7 @@ export function useDeliveryReceptionForm({
             notify(notificationInfo);
             router.push("/entregas-recepciones-realizadas");
         } catch (error) {
+            console.log(error);
             const notificationInfo: NotificationInfo = {
                 title: "Servicio no disponible",
                 message:

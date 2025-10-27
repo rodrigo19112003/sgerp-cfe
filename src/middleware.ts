@@ -61,6 +61,7 @@ export const config = {
         "/entregas-recepciones-en-proceso",
         "/entregas-recepciones-liberadas",
         "/entregas-recepciones-realizadas",
+        "/entregas-recepciones-realizadas/nueva",
         "/entregas-recepciones-recibidas",
         "/usuarios",
         "/usuarios/nuevo",

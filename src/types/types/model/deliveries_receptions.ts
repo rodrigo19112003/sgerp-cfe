@@ -1,4 +1,11 @@
-import { DeliveryReceptionStatusCodes } from "@/types/enums/delivery_reception_status_codes";
+import DeliveryReceptionStatusCodes from "@/types/enums/delivery_reception_status_codes";
+import EvidenceCategories from "@/types/enums/evidence_categories";
+
+interface IFile {
+    category: EvidenceCategories;
+    name: string;
+    content: string | Buffer;
+}
 
 type DeliveryReception = {
     id: number;
@@ -10,4 +17,27 @@ type DeliveryReception = {
     deliveryReceptionId: number;
 };
 
-export type { DeliveryReception };
+type DeliveryReceptionWithAllInformation = {
+    id?: number;
+    generalData?: string;
+    otherFacts?: string;
+    procedureReport?: string;
+    financialResources?: string;
+    humanResources?: string;
+    materialResources?: string;
+    areaBudgetStatus?: string;
+    programmaticStatus?: string;
+    procedureReportFile?: IFile;
+    financialResourcesFile?: IFile;
+    humanResourcesFile?: IFile;
+    materialResourcesFile?: IFile;
+    areaBudgetStatusFile?: IFile;
+    programmaticStatusFile?: IFile;
+    employeeNumberReceiver?: string;
+    fullNameReceiver?: string;
+    employeeNumberMaker?: string;
+    fullNameMaker?: string;
+    status: DeliveryReceptionStatusCodes;
+};
+
+export type { DeliveryReception, DeliveryReceptionWithAllInformation, IFile };

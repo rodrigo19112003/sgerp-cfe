@@ -8,6 +8,7 @@ const ADMIN_ROUTES: (string | RegExp)[] = [
 
 const WORKER_ROUTES: (string | RegExp)[] = [
     "/entregas-recepciones-realizadas",
+    "/entregas-recepciones-realizadas/nueva",
     "/entregas-recepciones-recibidas",
 ];
 

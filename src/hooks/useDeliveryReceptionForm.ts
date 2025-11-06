@@ -86,11 +86,15 @@ export function useDeliveryReceptionForm({
 
     const {
         register,
+        trigger,
         handleSubmit: submitWrapper,
         formState: { errors },
         reset,
     } = useForm({
         defaultValues: FORM_INITIAL_VALUES,
+        mode: "onChange",
+        reValidateMode: "onChange",
+        shouldUnregister: false,
     });
 
     const finishLoadingDeliveryReception = useCallback(
@@ -126,7 +130,6 @@ export function useDeliveryReceptionForm({
 
             finishLoadingDeliveryReception(deliveryReception);
         } catch (error) {
-            console.log(error);
             let message =
                 "Por el momento el sistema no se encuentra disponible, por favor intente más tarde";
             if (
@@ -135,7 +138,7 @@ export function useDeliveryReceptionForm({
                 error.response?.status !== HttpStatusCodes.TOO_MANY_REQUESTS
             ) {
                 message =
-                    "No se pudieron obtener los usuarios porque el administrador no se pudo identificar";
+                    "Hubo un error al cargar la entrega-recepción, ya que no se pudo localizar en el servidor";
             }
             fireErrorLoadingDeliveryReception(message);
         }
@@ -382,8 +385,11 @@ export function useDeliveryReceptionForm({
     return {
         deliveryReception,
         register,
+        trigger,
         errors,
         handleSubmit,
         isLoadingRegisteringDeliveryReception,
     };
 }
+
+export type { DeliveryReceptionInformationForm };

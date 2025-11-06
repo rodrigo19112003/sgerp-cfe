@@ -1,11 +1,13 @@
 "use client";
 import { PrimaryButton } from "@/components/buttons/PrimaryButton";
 import { CancelButton } from "@/components/buttons/CancelButton";
+import { TernaryButton } from "../buttons/TernaryButton";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { ErrorBanner } from "./ErrorBanner";
 import { useDeliveryReceptionForm } from "@/hooks/useDeliveryReceptionForm";
+import type { DeliveryReceptionInformationForm } from "@/hooks/useDeliveryReceptionForm";
 import { EMPLOYEE_NUMBER_PATTERN } from "@/utils/regexp";
 import { IFile } from "@/types/types/model/deliveries_receptions";
 
@@ -29,6 +31,7 @@ export const DeliveryReceptionForm = ({
         handleSubmit,
         errors,
         register,
+        trigger,
         isLoadingRegisteringDeliveryReception,
     } = useDeliveryReceptionForm({
         isEdition,
@@ -58,6 +61,28 @@ export const DeliveryReceptionForm = ({
         areaBudgetStatusFileFromBackend,
         setAreaBudgetStatusFileFromBackend,
     ] = useState<IFile | null>(null);
+
+    const steps: (keyof DeliveryReceptionInformationForm)[][] = [
+        ["generalData"],
+
+        ["programmaticStatus", "programmaticStatusFile"],
+        ["areaBudgetStatus", "areaBudgetStatusFile"],
+        ["financialResources", "financialResourcesFile"],
+        ["materialResources", "materialResourcesFile"],
+        ["humanResources", "humanResourcesFile"],
+        ["procedureReport", "procedureReportFile"],
+
+        ["otherFacts"],
+
+        ["employeeNumberReceiver"],
+    ];
+
+    const [step, setStep] = useState(0);
+
+    const nextStep = async () => {
+        const valid = await trigger(steps[step]);
+        if (valid) setStep(step + 1);
+    };
 
     useEffect(() => {
         if (isEdition && deliveryReception.value) {
@@ -118,61 +143,79 @@ export const DeliveryReceptionForm = ({
     ) : (
         <>
             <form onSubmit={handleSubmit}>
-                <div
-                    className={`form-group ${
-                        errors.generalData ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="generalData">DATOS GENERALES</label>
-                    <textarea
-                        {...register("generalData", {
-                            required: true,
-                        })}
-                        id="generalData"
-                        rows={5}
-                    />
-                    <p className="error">Datos generales inválidos</p>
-                </div>
+                <section style={{ display: step === 0 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.generalData ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="generalData">DATOS GENERALES</label>
+                        <textarea
+                            {...register("generalData", {
+                                required: true,
+                            })}
+                            id="generalData"
+                            rows={5}
+                        />
+                        <p className="error">Datos generales inválidos</p>
+                    </div>
+                </section>
 
-                <div
-                    className={`form-group ${
-                        errors.programmaticStatus ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="programmaticStatus">
-                        I. SITUACIÓN PROGRAMÁTICA
-                    </label>
-                    <textarea
-                        {...register("programmaticStatus", {
-                            required: true,
-                        })}
-                        id="programmaticStatus"
-                        rows={5}
-                    />
-                    <p className="error">Situación programática inválida</p>
-                </div>
+                <section style={{ display: step === 1 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.programmaticStatus ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="programmaticStatus">
+                            I. SITUACIÓN PROGRAMÁTICA
+                        </label>
+                        <textarea
+                            {...register("programmaticStatus", {
+                                required: true,
+                            })}
+                            id="programmaticStatus"
+                            rows={5}
+                        />
+                        <p className="error">Situación programática inválida</p>
+                    </div>
 
-                <div
-                    className={`form-group ${
-                        errors.programmaticStatusFile ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="programmaticStatusFile">
-                        Evidencia - Situación Programática (PDF)
-                    </label>
-                    <input
-                        type="file"
-                        id="programmaticStatusFile"
-                        accept="application/pdf"
-                        {...register("programmaticStatusFile", {
-                            validate: (files) => {
-                                const fileList = files as FileList | null;
-                                if (
-                                    isEdition &&
-                                    deliveryReception.value!
-                                        .programmaticStatusFile
-                                ) {
-                                    if (fileList && fileList.length > 0) {
+                    <div
+                        className={`form-group ${
+                            errors.programmaticStatusFile ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="programmaticStatusFile">
+                            Evidencia - Situación Programática (PDF)
+                        </label>
+                        <input
+                            type="file"
+                            id="programmaticStatusFile"
+                            accept="application/pdf"
+                            {...register("programmaticStatusFile", {
+                                validate: (files) => {
+                                    const fileList = files as FileList | null;
+                                    if (
+                                        isEdition &&
+                                        deliveryReception.value!
+                                            .programmaticStatusFile
+                                    ) {
+                                        if (fileList && fileList.length > 0) {
+                                            if (
+                                                fileList[0].type !==
+                                                "application/pdf"
+                                            )
+                                                return false;
+                                            if (
+                                                fileList[0].size >
+                                                10 * 1024 * 1024
+                                            )
+                                                return false;
+                                        }
+                                        return true;
+                                    } else {
+                                        if (!fileList || fileList.length === 0)
+                                            return false;
                                         if (
                                             fileList[0].type !==
                                             "application/pdf"
@@ -180,80 +223,93 @@ export const DeliveryReceptionForm = ({
                                             return false;
                                         if (fileList[0].size > 10 * 1024 * 1024)
                                             return false;
+                                        return true;
                                     }
-                                    return true;
-                                } else {
-                                    if (!fileList || fileList.length === 0)
-                                        return false;
-                                    if (fileList[0].type !== "application/pdf")
-                                        return false;
-                                    if (fileList[0].size > 10 * 1024 * 1024)
-                                        return false;
-                                    return true;
-                                }
-                            },
-                        })}
-                        onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                                setProgrammaticStatusFileFromBackend(null);
-                            }
-                        }}
-                    />
-
-                    {isEdition && programmaticStatusFileFromBackend && (
-                        <p>
-                            Archivo cargado:{" "}
-                            {programmaticStatusFileFromBackend.name}
-                        </p>
-                    )}
-
-                    <p className="error">
-                        Debe subir un archivo PDF con tamaño máximo de 10 MB
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.areaBudgetStatus ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="areaBudgetStatus">
-                        II. SITUACIÓN DEL PRESUPUESTO ASIGNADO AL ÁREA
-                    </label>
-                    <textarea
-                        {...register("areaBudgetStatus", {
-                            required: true,
-                        })}
-                        id="areaBudgetStatus"
-                        rows={5}
-                    />
-                    <p className="error">
-                        Situación del presupuesto asignado al área inválida
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.areaBudgetStatusFile ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="areaBudgetStatusFile">
-                        Evidencia - Situación del presupuesto asignado al área
-                        (PDF)
-                    </label>
-                    <input
-                        type="file"
-                        id="areaBudgetStatusFile"
-                        accept="application/pdf"
-                        {...register("areaBudgetStatusFile", {
-                            validate: (files) => {
-                                const fileList = files as FileList | null;
+                                },
+                            })}
+                            onChange={(e) => {
                                 if (
-                                    isEdition &&
-                                    deliveryReception.value!
-                                        .areaBudgetStatusFile
+                                    e.target.files &&
+                                    e.target.files.length > 0
                                 ) {
-                                    if (fileList && fileList.length > 0) {
+                                    setProgrammaticStatusFileFromBackend(null);
+                                }
+                                register("programmaticStatusFile").onChange(e);
+                                trigger("programmaticStatusFile");
+                            }}
+                        />
+
+                        {isEdition && programmaticStatusFileFromBackend && (
+                            <p>
+                                Archivo cargado:{" "}
+                                {programmaticStatusFileFromBackend.name}
+                            </p>
+                        )}
+
+                        <p className="error">
+                            Debe subir un archivo PDF con tamaño máximo de 10 MB
+                        </p>
+                    </div>
+                </section>
+
+                <section style={{ display: step === 2 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.areaBudgetStatus ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="areaBudgetStatus">
+                            II. SITUACIÓN DEL PRESUPUESTO ASIGNADO AL ÁREA
+                        </label>
+                        <textarea
+                            {...register("areaBudgetStatus", {
+                                required: true,
+                            })}
+                            id="areaBudgetStatus"
+                            rows={5}
+                        />
+                        <p className="error">
+                            Situación del presupuesto asignado al área inválida
+                        </p>
+                    </div>
+
+                    <div
+                        className={`form-group ${
+                            errors.areaBudgetStatusFile ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="areaBudgetStatusFile">
+                            Evidencia - Situación del presupuesto asignado al
+                            área (PDF)
+                        </label>
+                        <input
+                            type="file"
+                            id="areaBudgetStatusFile"
+                            accept="application/pdf"
+                            {...register("areaBudgetStatusFile", {
+                                validate: (files) => {
+                                    const fileList = files as FileList | null;
+                                    if (
+                                        isEdition &&
+                                        deliveryReception.value!
+                                            .areaBudgetStatusFile
+                                    ) {
+                                        if (fileList && fileList.length > 0) {
+                                            if (
+                                                fileList[0].type !==
+                                                "application/pdf"
+                                            )
+                                                return false;
+                                            if (
+                                                fileList[0].size >
+                                                10 * 1024 * 1024
+                                            )
+                                                return false;
+                                        }
+                                        return true;
+                                    } else {
+                                        if (!fileList || fileList.length === 0)
+                                            return false;
                                         if (
                                             fileList[0].type !==
                                             "application/pdf"
@@ -261,77 +317,90 @@ export const DeliveryReceptionForm = ({
                                             return false;
                                         if (fileList[0].size > 10 * 1024 * 1024)
                                             return false;
+                                        return true;
                                     }
-                                    return true;
-                                } else {
-                                    if (!fileList || fileList.length === 0)
-                                        return false;
-                                    if (fileList[0].type !== "application/pdf")
-                                        return false;
-                                    if (fileList[0].size > 10 * 1024 * 1024)
-                                        return false;
-                                    return true;
-                                }
-                            },
-                        })}
-                        onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                                setAreaBudgetStatusFileFromBackend(null);
-                            }
-                        }}
-                    />
-
-                    {isEdition && areaBudgetStatusFileFromBackend && (
-                        <p>
-                            Archivo cargado:{" "}
-                            {areaBudgetStatusFileFromBackend.name}
-                        </p>
-                    )}
-
-                    <p className="error">
-                        Debe subir un archivo PDF con tamaño máximo de 10 MB
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.financialResources ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="financialResources">
-                        III. RECURSOS FINANCIEROS
-                    </label>
-                    <textarea
-                        {...register("financialResources", {
-                            required: true,
-                        })}
-                        id="financialResources"
-                        rows={5}
-                    />
-                    <p className="error">Recursos financieros inválidos</p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.financialResourcesFile ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="financialResourcesFile">
-                        Evidencia - Recursos Financieros (PDF)
-                    </label>
-                    <input
-                        type="file"
-                        id="financialResourcesFile"
-                        accept="application/pdf"
-                        {...register("financialResourcesFile", {
-                            validate: (files) => {
-                                const fileList = files as FileList | null;
+                                },
+                            })}
+                            onChange={(e) => {
                                 if (
-                                    isEdition &&
-                                    deliveryReception.value!
-                                        .financialResourcesFile
+                                    e.target.files &&
+                                    e.target.files.length > 0
                                 ) {
-                                    if (fileList && fileList.length > 0) {
+                                    setAreaBudgetStatusFileFromBackend(null);
+                                }
+                                register("areaBudgetStatusFile").onChange(e);
+                                trigger("areaBudgetStatusFile");
+                            }}
+                        />
+
+                        {isEdition && areaBudgetStatusFileFromBackend && (
+                            <p>
+                                Archivo cargado:{" "}
+                                {areaBudgetStatusFileFromBackend.name}
+                            </p>
+                        )}
+
+                        <p className="error">
+                            Debe subir un archivo PDF con tamaño máximo de 10 MB
+                        </p>
+                    </div>
+                </section>
+
+                <section style={{ display: step === 3 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.financialResources ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="financialResources">
+                            III. RECURSOS FINANCIEROS
+                        </label>
+                        <textarea
+                            {...register("financialResources", {
+                                required: true,
+                            })}
+                            id="financialResources"
+                            rows={5}
+                        />
+                        <p className="error">Recursos financieros inválidos</p>
+                    </div>
+
+                    <div
+                        className={`form-group ${
+                            errors.financialResourcesFile ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="financialResourcesFile">
+                            Evidencia - Recursos Financieros (PDF)
+                        </label>
+                        <input
+                            type="file"
+                            id="financialResourcesFile"
+                            accept="application/pdf"
+                            {...register("financialResourcesFile", {
+                                validate: (files) => {
+                                    const fileList = files as FileList | null;
+                                    if (
+                                        isEdition &&
+                                        deliveryReception.value!
+                                            .financialResourcesFile
+                                    ) {
+                                        if (fileList && fileList.length > 0) {
+                                            if (
+                                                fileList[0].type !==
+                                                "application/pdf"
+                                            )
+                                                return false;
+                                            if (
+                                                fileList[0].size >
+                                                10 * 1024 * 1024
+                                            )
+                                                return false;
+                                        }
+                                        return true;
+                                    } else {
+                                        if (!fileList || fileList.length === 0)
+                                            return false;
                                         if (
                                             fileList[0].type !==
                                             "application/pdf"
@@ -339,77 +408,90 @@ export const DeliveryReceptionForm = ({
                                             return false;
                                         if (fileList[0].size > 10 * 1024 * 1024)
                                             return false;
+                                        return true;
                                     }
-                                    return true;
-                                } else {
-                                    if (!fileList || fileList.length === 0)
-                                        return false;
-                                    if (fileList[0].type !== "application/pdf")
-                                        return false;
-                                    if (fileList[0].size > 10 * 1024 * 1024)
-                                        return false;
-                                    return true;
-                                }
-                            },
-                        })}
-                        onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                                setFinancialResourcesFileFromBackend(null);
-                            }
-                        }}
-                    />
-
-                    {isEdition && financialResourcesFileFromBackend && (
-                        <p>
-                            Archivo cargado:{" "}
-                            {financialResourcesFileFromBackend.name}
-                        </p>
-                    )}
-
-                    <p className="error">
-                        Debe subir un archivo PDF con tamaño máximo de 10 MB
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.materialResources ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="materialResources">
-                        IV. RECURSOS MATERIALES
-                    </label>
-                    <textarea
-                        {...register("materialResources", {
-                            required: true,
-                        })}
-                        id="materialResources"
-                        rows={5}
-                    />
-                    <p className="error">Recursos materiales inválidos</p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.materialResourcesFile ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="materialResourcesFile">
-                        Evidencia - Recursos Materiales (PDF)
-                    </label>
-                    <input
-                        type="file"
-                        id="materialResourcesFile"
-                        accept="application/pdf"
-                        {...register("materialResourcesFile", {
-                            validate: (files) => {
-                                const fileList = files as FileList | null;
+                                },
+                            })}
+                            onChange={(e) => {
                                 if (
-                                    isEdition &&
-                                    deliveryReception.value!
-                                        .materialResourcesFile
+                                    e.target.files &&
+                                    e.target.files.length > 0
                                 ) {
-                                    if (fileList && fileList.length > 0) {
+                                    setFinancialResourcesFileFromBackend(null);
+                                }
+                                register("financialResourcesFile").onChange(e);
+                                trigger("financialResourcesFile");
+                            }}
+                        />
+
+                        {isEdition && financialResourcesFileFromBackend && (
+                            <p>
+                                Archivo cargado:{" "}
+                                {financialResourcesFileFromBackend.name}
+                            </p>
+                        )}
+
+                        <p className="error">
+                            Debe subir un archivo PDF con tamaño máximo de 10 MB
+                        </p>
+                    </div>
+                </section>
+
+                <section style={{ display: step === 4 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.materialResources ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="materialResources">
+                            IV. RECURSOS MATERIALES
+                        </label>
+                        <textarea
+                            {...register("materialResources", {
+                                required: true,
+                            })}
+                            id="materialResources"
+                            rows={5}
+                        />
+                        <p className="error">Recursos materiales inválidos</p>
+                    </div>
+
+                    <div
+                        className={`form-group ${
+                            errors.materialResourcesFile ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="materialResourcesFile">
+                            Evidencia - Recursos Materiales (PDF)
+                        </label>
+                        <input
+                            type="file"
+                            id="materialResourcesFile"
+                            accept="application/pdf"
+                            {...register("materialResourcesFile", {
+                                validate: (files) => {
+                                    const fileList = files as FileList | null;
+                                    if (
+                                        isEdition &&
+                                        deliveryReception.value!
+                                            .materialResourcesFile
+                                    ) {
+                                        if (fileList && fileList.length > 0) {
+                                            if (
+                                                fileList[0].type !==
+                                                "application/pdf"
+                                            )
+                                                return false;
+                                            if (
+                                                fileList[0].size >
+                                                10 * 1024 * 1024
+                                            )
+                                                return false;
+                                        }
+                                        return true;
+                                    } else {
+                                        if (!fileList || fileList.length === 0)
+                                            return false;
                                         if (
                                             fileList[0].type !==
                                             "application/pdf"
@@ -417,74 +499,90 @@ export const DeliveryReceptionForm = ({
                                             return false;
                                         if (fileList[0].size > 10 * 1024 * 1024)
                                             return false;
+                                        return true;
                                     }
-                                    return true;
-                                } else {
-                                    if (!fileList || fileList.length === 0)
-                                        return false;
-                                    if (fileList[0].type !== "application/pdf")
-                                        return false;
-                                    if (fileList[0].size > 10 * 1024 * 1024)
-                                        return false;
-                                    return true;
-                                }
-                            },
-                        })}
-                        onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                                setMaterialResourcesFileFromBackend(null);
-                            }
-                        }}
-                    />
-
-                    {isEdition && materialResourcesFileFromBackend && (
-                        <p>
-                            Archivo cargado:{" "}
-                            {materialResourcesFileFromBackend.name}
-                        </p>
-                    )}
-
-                    <p className="error">
-                        Debe subir un archivo PDF con tamaño máximo de 10 MB
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.humanResources ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="humanResources">V. RECURSOS HUMANOS</label>
-                    <textarea
-                        {...register("humanResources", {
-                            required: true,
-                        })}
-                        id="humanResources"
-                        rows={5}
-                    />
-                    <p className="error">Recursos humanos inválidos</p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.humanResourcesFile ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="humanResourcesFile">
-                        Evidencia - Recursos Humanos (PDF)
-                    </label>
-                    <input
-                        type="file"
-                        id="humanResourcesFile"
-                        accept="application/pdf"
-                        {...register("humanResourcesFile", {
-                            validate: (files) => {
-                                const fileList = files as FileList | null;
+                                },
+                            })}
+                            onChange={(e) => {
                                 if (
-                                    isEdition &&
-                                    deliveryReception.value!.humanResourcesFile
+                                    e.target.files &&
+                                    e.target.files.length > 0
                                 ) {
-                                    if (fileList && fileList.length > 0) {
+                                    setMaterialResourcesFileFromBackend(null);
+                                }
+                                register("materialResourcesFile").onChange(e);
+                                trigger("materialResourcesFile");
+                            }}
+                        />
+
+                        {isEdition && materialResourcesFileFromBackend && (
+                            <p>
+                                Archivo cargado:{" "}
+                                {materialResourcesFileFromBackend.name}
+                            </p>
+                        )}
+
+                        <p className="error">
+                            Debe subir un archivo PDF con tamaño máximo de 10 MB
+                        </p>
+                    </div>
+                </section>
+
+                <section style={{ display: step === 5 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.humanResources ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="humanResources">
+                            V. RECURSOS HUMANOS
+                        </label>
+                        <textarea
+                            {...register("humanResources", {
+                                required: true,
+                            })}
+                            id="humanResources"
+                            rows={5}
+                        />
+                        <p className="error">Recursos humanos inválidos</p>
+                    </div>
+
+                    <div
+                        className={`form-group ${
+                            errors.humanResourcesFile ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="humanResourcesFile">
+                            Evidencia - Recursos Humanos (PDF)
+                        </label>
+                        <input
+                            type="file"
+                            id="humanResourcesFile"
+                            accept="application/pdf"
+                            {...register("humanResourcesFile", {
+                                validate: (files) => {
+                                    const fileList = files as FileList | null;
+                                    if (
+                                        isEdition &&
+                                        deliveryReception.value!
+                                            .humanResourcesFile
+                                    ) {
+                                        if (fileList && fileList.length > 0) {
+                                            if (
+                                                fileList[0].type !==
+                                                "application/pdf"
+                                            )
+                                                return false;
+                                            if (
+                                                fileList[0].size >
+                                                10 * 1024 * 1024
+                                            )
+                                                return false;
+                                        }
+                                        return true;
+                                    } else {
+                                        if (!fileList || fileList.length === 0)
+                                            return false;
                                         if (
                                             fileList[0].type !==
                                             "application/pdf"
@@ -492,78 +590,92 @@ export const DeliveryReceptionForm = ({
                                             return false;
                                         if (fileList[0].size > 10 * 1024 * 1024)
                                             return false;
+                                        return true;
                                     }
-                                    return true;
-                                } else {
-                                    if (!fileList || fileList.length === 0)
-                                        return false;
-                                    if (fileList[0].type !== "application/pdf")
-                                        return false;
-                                    if (fileList[0].size > 10 * 1024 * 1024)
-                                        return false;
-                                    return true;
-                                }
-                            },
-                        })}
-                        onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                                setHumanResourcesFileFromBackend(null);
-                            }
-                        }}
-                    />
-
-                    {isEdition && humanResourcesFileFromBackend && (
-                        <p>
-                            Archivo cargado:{" "}
-                            {humanResourcesFileFromBackend.name}
-                        </p>
-                    )}
-
-                    <p className="error">
-                        Debe subir un archivo PDF con tamaño máximo de 10 MB
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.procedureReport ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="procedureReport">
-                        VI. INFORME DE ASUNTOS EN TRÁMITE
-                    </label>
-                    <textarea
-                        {...register("procedureReport", {
-                            required: true,
-                        })}
-                        id="procedureReport"
-                        rows={5}
-                    />
-                    <p className="error">
-                        Informe de asuntos en trámite inválido
-                    </p>
-                </div>
-
-                <div
-                    className={`form-group ${
-                        errors.procedureReportFile ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="procedureReportFile">
-                        Evidencia - Informe de Asuntos en Trámite (PDF)
-                    </label>
-                    <input
-                        type="file"
-                        id="procedureReportFile"
-                        accept="application/pdf"
-                        {...register("procedureReportFile", {
-                            validate: (files) => {
-                                const fileList = files as FileList | null;
+                                },
+                            })}
+                            onChange={(e) => {
                                 if (
-                                    isEdition &&
-                                    deliveryReception.value!.procedureReportFile
+                                    e.target.files &&
+                                    e.target.files.length > 0
                                 ) {
-                                    if (fileList && fileList.length > 0) {
+                                    setHumanResourcesFileFromBackend(null);
+                                }
+                                register("humanResourcesFile").onChange(e);
+                                trigger("humanResourcesFile");
+                            }}
+                        />
+
+                        {isEdition && humanResourcesFileFromBackend && (
+                            <p>
+                                Archivo cargado:{" "}
+                                {humanResourcesFileFromBackend.name}
+                            </p>
+                        )}
+
+                        <p className="error">
+                            Debe subir un archivo PDF con tamaño máximo de 10 MB
+                        </p>
+                    </div>
+                </section>
+
+                <section style={{ display: step === 6 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.procedureReport ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="procedureReport">
+                            VI. INFORME DE ASUNTOS EN TRÁMITE
+                        </label>
+                        <textarea
+                            {...register("procedureReport", {
+                                required: true,
+                            })}
+                            id="procedureReport"
+                            rows={5}
+                        />
+                        <p className="error">
+                            Informe de asuntos en trámite inválido
+                        </p>
+                    </div>
+
+                    <div
+                        className={`form-group ${
+                            errors.procedureReportFile ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="procedureReportFile">
+                            Evidencia - Informe de Asuntos en Trámite (PDF)
+                        </label>
+                        <input
+                            type="file"
+                            id="procedureReportFile"
+                            accept="application/pdf"
+                            {...register("procedureReportFile", {
+                                validate: (files) => {
+                                    const fileList = files as FileList | null;
+                                    if (
+                                        isEdition &&
+                                        deliveryReception.value!
+                                            .procedureReportFile
+                                    ) {
+                                        if (fileList && fileList.length > 0) {
+                                            if (
+                                                fileList[0].type !==
+                                                "application/pdf"
+                                            )
+                                                return false;
+                                            if (
+                                                fileList[0].size >
+                                                10 * 1024 * 1024
+                                            )
+                                                return false;
+                                        }
+                                        return true;
+                                    } else {
+                                        if (!fileList || fileList.length === 0)
+                                            return false;
                                         if (
                                             fileList[0].type !==
                                             "application/pdf"
@@ -571,70 +683,75 @@ export const DeliveryReceptionForm = ({
                                             return false;
                                         if (fileList[0].size > 10 * 1024 * 1024)
                                             return false;
+                                        return true;
                                     }
-                                    return true;
-                                } else {
-                                    if (!fileList || fileList.length === 0)
-                                        return false;
-                                    if (fileList[0].type !== "application/pdf")
-                                        return false;
-                                    if (fileList[0].size > 10 * 1024 * 1024)
-                                        return false;
-                                    return true;
+                                },
+                            })}
+                            onChange={(e) => {
+                                if (
+                                    e.target.files &&
+                                    e.target.files.length > 0
+                                ) {
+                                    setProcedureReportFileFromBackend(null);
                                 }
-                            },
-                        })}
-                        onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                                setProcedureReportFileFromBackend(null);
-                            }
-                        }}
-                    />
+                                register("procedureReportFile").onChange(e);
+                                trigger("procedureReportFile");
+                            }}
+                        />
 
-                    {isEdition && procedureReportFileFromBackend && (
-                        <p>
-                            Archivo cargado:{" "}
-                            {procedureReportFileFromBackend.name}
+                        {isEdition && procedureReportFileFromBackend && (
+                            <p>
+                                Archivo cargado:{" "}
+                                {procedureReportFileFromBackend.name}
+                            </p>
+                        )}
+
+                        <p className="error">
+                            Debe subir un archivo PDF con tamaño máximo de 10 MB
                         </p>
-                    )}
-                </div>
+                    </div>
+                </section>
 
-                <div
-                    className={`form-group ${
-                        errors.otherFacts ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="otherFacts">VII. OTROS HECHOS</label>
-                    <textarea
-                        {...register("otherFacts", {
-                            required: true,
-                        })}
-                        id="otherFacts"
-                        rows={5}
-                    />
-                    <p className="error">Otros hechos inválidos</p>
-                </div>
+                <section style={{ display: step === 7 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.otherFacts ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="otherFacts">VII. OTROS HECHOS</label>
+                        <textarea
+                            {...register("otherFacts", {
+                                required: true,
+                            })}
+                            id="otherFacts"
+                            rows={5}
+                        />
+                        <p className="error">Otros hechos inválidos</p>
+                    </div>
+                </section>
 
-                <div
-                    className={`form-group ${
-                        errors.employeeNumberReceiver ? "invalid" : ""
-                    }`}
-                >
-                    <label htmlFor="employeeNumberReceiver">
-                        RPE/RTT del trabajador que recibe el puesto
-                    </label>
-                    <input
-                        {...register("employeeNumberReceiver", {
-                            required: true,
-                            maxLength: 5,
-                            pattern: EMPLOYEE_NUMBER_PATTERN,
-                        })}
-                        id="employeeNumberReceiver"
-                        type="text"
-                        disabled={isEdition}
-                    />
-                    <p className="error">RPE/RTT inválido</p>
-                </div>
+                <section style={{ display: step === 8 ? "block" : "none" }}>
+                    <div
+                        className={`form-group ${
+                            errors.employeeNumberReceiver ? "invalid" : ""
+                        }`}
+                    >
+                        <label htmlFor="employeeNumberReceiver">
+                            RPE/RTT del trabajador que recibe el puesto
+                        </label>
+                        <input
+                            {...register("employeeNumberReceiver", {
+                                required: true,
+                                maxLength: 5,
+                                pattern: EMPLOYEE_NUMBER_PATTERN,
+                            })}
+                            id="employeeNumberReceiver"
+                            type="text"
+                            disabled={isEdition}
+                        />
+                        <p className="error">RPE/RTT inválido</p>
+                    </div>
+                </section>
 
                 <ConfirmationModal
                     title="Cancelación de registro"
@@ -650,7 +767,7 @@ export const DeliveryReceptionForm = ({
                     onConfirm={confirmCancel}
                 />
 
-                <div className="mt-5 flex justify-end gap-4">
+                <div className="flex justify-end gap-4 mt-5">
                     <CancelButton
                         type="button"
                         onClick={handleCancelRegistration}
@@ -659,17 +776,32 @@ export const DeliveryReceptionForm = ({
                             ? "Cancelar actualización"
                             : "Cancelar registro"}
                     </CancelButton>
-                    <PrimaryButton
-                        disabled={isLoadingRegisteringDeliveryReception}
-                    >
-                        {isLoadingRegisteringDeliveryReception
-                            ? isEdition
-                                ? "Actualizando..."
-                                : "Registrando..."
-                            : isEdition
-                            ? "Actualizar"
-                            : "Registrar"}
-                    </PrimaryButton>
+                    {step > 0 && (
+                        <TernaryButton
+                            type="button"
+                            onClick={() => setStep(step - 1)}
+                        >
+                            Anterior
+                        </TernaryButton>
+                    )}
+                    {step < steps.length - 1 && (
+                        <TernaryButton type="button" onClick={nextStep}>
+                            Siguiente
+                        </TernaryButton>
+                    )}
+                    {step === steps.length - 1 && (
+                        <PrimaryButton
+                            disabled={isLoadingRegisteringDeliveryReception}
+                        >
+                            {isLoadingRegisteringDeliveryReception
+                                ? isEdition
+                                    ? "Actualizando..."
+                                    : "Registrando..."
+                                : isEdition
+                                ? "Actualizar"
+                                : "Registrar"}
+                        </PrimaryButton>
+                    )}
                 </div>
             </form>
         </>

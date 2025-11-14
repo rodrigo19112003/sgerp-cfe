@@ -125,11 +125,11 @@ body {
     outline: 5px solid #2563EB50;
   }
 
-  button {
+  button, summary {
     cursor: pointer;
   }
 
-  li, h1, h2, h3, h4, h5, h6 {
+  li, h1, h2, h3, h4, h5, h6, summary {
     @apply font-bold;
   }
 
@@ -137,7 +137,7 @@ body {
     @apply text-2xl;
   }
 
-  h2 {
+  h2, summary  {
     @apply text-xl;
   }
 

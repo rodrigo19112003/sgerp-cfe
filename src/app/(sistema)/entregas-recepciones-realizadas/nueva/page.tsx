@@ -5,7 +5,7 @@ export const metadata: Metadata = {
     title: "Registrar Entrega-Recepción",
 };
 
-export default function UserRegistration() {
+export default function DeliveryReceptionRegistration() {
     return (
         <div className="my-20 mx-auto max-w-md px-5 pt-12">
             <FormWrapper />

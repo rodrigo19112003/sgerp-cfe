@@ -322,7 +322,6 @@ export function useDeliveryReceptionForm({
             notify(notificationInfo);
             router.push("/entregas-recepciones-realizadas");
         } catch (error) {
-            console.log(error);
             const notificationInfo: NotificationInfo = {
                 title: "Servicio no disponible",
                 message:

@@ -1,15 +1,15 @@
 import { Metadata } from "next";
-import { FormWrapper } from "./_components/FormWrapper";
+import { DeliveryReceptionWrapper } from "@/components/ui/DeliveryReceptionWrapper";
 
 export const metadata: Metadata = {
-    title: "Registrar Entrega-Recepción",
+    title: "Entrega-Recepción Pendiente",
 };
 
-export default function DeliveryReceptionRegistration() {
+export default function DeliveryReceptionPending() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 my-20">
             <div className="col-span-1 md:col-start-2 md:col-span-2 mx-auto px-5 pt-12 w-full">
-                <FormWrapper />
+                <DeliveryReceptionWrapper />
             </div>
         </div>
     );

@@ -20,9 +20,11 @@ export const DeliveryReceptionInformation = () => {
     const deliveryReceptionIdNumber = validatedDeliveryReceptionId
         ? Number(validatedDeliveryReceptionId)
         : NaN;
-    const { deliveryReception } = useDeliveryReception({
-        deliveryReceptionId: deliveryReceptionIdNumber,
-    });
+    const { deliveryReception, acceptDeliveryReception } = useDeliveryReception(
+        {
+            deliveryReceptionId: deliveryReceptionIdNumber,
+        }
+    );
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
@@ -32,18 +34,14 @@ export const DeliveryReceptionInformation = () => {
     }, []);
 
     const confirmAceptation = useCallback(() => {
+        acceptDeliveryReception();
         setIsModalOpen(false);
-        switch (deliveryReception.value!.status) {
-            case DeliveryReceptionStatusCodes.PENDING:
-                router.push("/entregas-recepciones-pendientes");
-                break;
-            case DeliveryReceptionStatusCodes.IN_PROCESS:
-                router.push("/entregas-recepciones-en-proceso");
-                break;
-            default:
-                router.push("/entregas-recepciones-realizadas");
+        if (userProfile.roles.includes(UserRoles.WORKER)) {
+            router.push("/entregas-recepciones-recibidas");
+        } else {
+            router.push("/entregas-recepciones-pendientes");
         }
-    }, [router, deliveryReception]);
+    }, [router, userProfile, acceptDeliveryReception]);
 
     const cancelAceptation = useCallback(() => {
         setIsModalOpen(false);
@@ -62,6 +60,227 @@ export const DeliveryReceptionInformation = () => {
         if (pdfWindow) {
             pdfWindow.document.write(
                 `<iframe width='100%' height='100%' src='data:application/pdf;base64,${base64String}'></iframe>`
+            );
+        }
+    };
+
+    const mergeAndViewCombinedPdf = async (): Promise<void> => {
+        if (!deliveryReception.value) return;
+
+        try {
+            const pdfLib = (await import(
+                "pdf-lib"
+            )) as typeof import("pdf-lib");
+            const { PDFDocument, StandardFonts, rgb } = pdfLib;
+
+            const base64ToUint8Array = async (
+                b64: string
+            ): Promise<Uint8Array> => {
+                if (!b64) return new Uint8Array();
+                const response = await fetch(
+                    `data:application/pdf;base64,${b64}`
+                );
+                const arrayBuffer = await response.arrayBuffer();
+                return new Uint8Array(arrayBuffer);
+            };
+
+            const mainDoc = await PDFDocument.create();
+            const font = await mainDoc.embedFont(StandardFonts.Helvetica);
+            const fontSize = 12;
+            const lineHeight = fontSize * 1.3;
+            const margin = 50;
+            const pageWidth = 612;
+            const pageHeight = 792;
+            const usableWidth = pageWidth - margin * 2;
+
+            const addTextPage = (title: string, text: string) => {
+                let page = mainDoc.addPage([pageWidth, pageHeight]);
+                const titleSize = 14;
+                let y = pageHeight - margin;
+
+                page.drawText(title, {
+                    x: margin,
+                    y: y - titleSize,
+                    size: titleSize,
+                    font,
+                    color: rgb(0, 0, 0),
+                });
+                y -= titleSize + 10;
+
+                const words = text ? text.split(/\s+/).filter(Boolean) : [];
+                const spaceCharWidth = font.widthOfTextAtSize(" ", fontSize);
+
+                const lines: string[][] = [];
+                let currentWords: string[] = [];
+                let currentWidth = 0;
+
+                for (const w of words) {
+                    const wordWidth = font.widthOfTextAtSize(w, fontSize);
+                    if (currentWords.length === 0) {
+                        currentWords.push(w);
+                        currentWidth = wordWidth;
+                    } else {
+                        const potentialWidth =
+                            currentWidth + spaceCharWidth + wordWidth;
+                        if (potentialWidth <= usableWidth) {
+                            currentWords.push(w);
+                            currentWidth = potentialWidth;
+                        } else {
+                            lines.push(currentWords);
+                            currentWords = [w];
+                            currentWidth = wordWidth;
+                        }
+                    }
+                }
+                if (currentWords.length > 0) {
+                    lines.push(currentWords);
+                }
+
+                for (let li = 0; li < lines.length; li++) {
+                    const lineWords = lines[li];
+
+                    if (y - fontSize < margin) {
+                        page = mainDoc.addPage([pageWidth, pageHeight]);
+                        y = pageHeight - margin;
+                    }
+
+                    const isLastLine = li === lines.length - 1;
+                    if (lineWords.length === 1 || isLastLine) {
+                        const lineStr = lineWords.join(" ");
+                        page.drawText(lineStr, {
+                            x: margin,
+                            y: y - fontSize,
+                            size: fontSize,
+                            font,
+                            color: rgb(0, 0, 0),
+                        });
+                    } else {
+                        const wordsWidths = lineWords.map((w) =>
+                            font.widthOfTextAtSize(w, fontSize)
+                        );
+                        const totalWordsWidth = wordsWidths.reduce(
+                            (s, v) => s + v,
+                            0
+                        );
+                        const gaps = lineWords.length - 1;
+                        const extraSpacePerGap =
+                            (usableWidth - totalWordsWidth) / gaps;
+
+                        let currentX = margin;
+                        for (let wi = 0; wi < lineWords.length; wi++) {
+                            const w = lineWords[wi];
+                            page.drawText(w, {
+                                x: currentX,
+                                y: y - fontSize,
+                                size: fontSize,
+                                font,
+                                color: rgb(0, 0, 0),
+                            });
+                            const wWidth = wordsWidths[wi];
+                            if (wi < lineWords.length - 1) {
+                                currentX += wWidth + extraSpacePerGap;
+                            }
+                        }
+                    }
+
+                    y -= lineHeight;
+                }
+            };
+
+            const appendEvidencePdf = async (
+                base64Pdf?: string
+            ): Promise<void> => {
+                if (!base64Pdf) return;
+                const uint8 = await base64ToUint8Array(base64Pdf);
+                const evidenceDoc = await PDFDocument.load(uint8);
+                const copiedPages = await mainDoc.copyPages(
+                    evidenceDoc,
+                    evidenceDoc.getPageIndices()
+                );
+                for (const p of copiedPages) {
+                    mainDoc.addPage(p);
+                }
+            };
+
+            addTextPage(
+                "ENTREGA-RECEPCIÓN",
+                `Creador: ${deliveryReception.value.employeeNumberMaker} - ${
+                    deliveryReception.value.fullNameMaker
+                }
+Receptor: ${deliveryReception.value.employeeNumberReceiver} - ${
+                    deliveryReception.value.fullNameReceiver
+                }
+
+DATOS GENERALES:
+${deliveryReception.value.generalData || ""}`
+            );
+
+            addTextPage(
+                "I. SITUACIÓN PROGRAMÁTICA",
+                deliveryReception.value.programmaticStatus || ""
+            );
+            await appendEvidencePdf(
+                deliveryReception.value.programmaticStatusFile
+                    ?.content as string
+            );
+
+            addTextPage(
+                "II. SITUACIÓN DEL PRESUPUESTO ASIGNADO AL ÁREA",
+                deliveryReception.value.areaBudgetStatus || ""
+            );
+            await appendEvidencePdf(
+                deliveryReception.value.areaBudgetStatusFile?.content as string
+            );
+
+            addTextPage(
+                "III. RECURSOS FINANCIEROS",
+                deliveryReception.value.financialResources || ""
+            );
+            await appendEvidencePdf(
+                deliveryReception.value.financialResourcesFile
+                    ?.content as string
+            );
+
+            addTextPage(
+                "IV. RECURSOS MATERIALES",
+                deliveryReception.value.materialResources || ""
+            );
+            await appendEvidencePdf(
+                deliveryReception.value.materialResourcesFile?.content as string
+            );
+
+            addTextPage(
+                "V. RECURSOS HUMANOS",
+                deliveryReception.value.humanResources || ""
+            );
+            await appendEvidencePdf(
+                deliveryReception.value.humanResourcesFile?.content as string
+            );
+
+            addTextPage(
+                "VI. INFORME DE ASUNTOS EN TRÁMITE",
+                deliveryReception.value.procedureReport || ""
+            );
+            await appendEvidencePdf(
+                deliveryReception.value.procedureReportFile?.content as string
+            );
+
+            addTextPage(
+                "VII. OTROS HECHOS",
+                deliveryReception.value.otherFacts || ""
+            );
+
+            const pdfBytes = await mainDoc.save();
+            const pdfCopy = Uint8Array.from(pdfBytes);
+            const blob = new Blob([pdfCopy.buffer], {
+                type: "application/pdf",
+            });
+            const url = URL.createObjectURL(blob);
+            window.open(url);
+            setTimeout(() => URL.revokeObjectURL(url), 1000 * 60);
+        } catch {
+            alert(
+                "No se pudo generar el PDF combinado. Revisa la consola para más detalles."
             );
         }
     };
@@ -318,6 +537,11 @@ export const DeliveryReceptionInformation = () => {
                     </div>
                 </details>
 
+                <div className="flex justify-center mt-6">
+                    <TernaryButton onClick={mergeAndViewCombinedPdf}>
+                        Ver entrega-recepción completa
+                    </TernaryButton>
+                </div>
                 <ConfirmationModal
                     title="Aceptación de entrega-recepción"
                     message={
@@ -332,8 +556,12 @@ export const DeliveryReceptionInformation = () => {
 
                 {deliveryReception.value!.status ===
                     DeliveryReceptionStatusCodes.PENDING &&
-                    userProfile.roles.includes(UserRoles.WITNESS) && (
-                        <div className="flex justify-end gap-4 mt-5">
+                    (userProfile.roles.includes(UserRoles.WITNESS) ||
+                        (userProfile.roles.includes(UserRoles.WORKER) &&
+                            userProfile.userProfile!.employeeNumber ===
+                                deliveryReception.value!
+                                    .employeeNumberReceiver)) && (
+                        <div className="flex justify-center gap-4 mt-5">
                             <PrimaryButton
                                 type="button"
                                 onClick={handleAceptation}
@@ -345,9 +573,10 @@ export const DeliveryReceptionInformation = () => {
 
                 {deliveryReception.value!.status ===
                     DeliveryReceptionStatusCodes.PENDING &&
-                    !userProfile.roles.includes(UserRoles.WITNESS) && (
+                    !userProfile.roles.includes(UserRoles.WITNESS) &&
+                    !userProfile.roles.includes(UserRoles.WORKER) && (
                         <div className="flex justify-center items-center">
-                            <p className="text-center mt-36 text-xl">
+                            <p className="text-center mt-6 text-xl">
                                 Esta entrega-recepción no ha sido aceptada por
                                 ningún usuario involucrado
                             </p>
@@ -356,9 +585,22 @@ export const DeliveryReceptionInformation = () => {
 
                 {deliveryReception.value!.status ===
                     DeliveryReceptionStatusCodes.IN_PROCESS &&
+                    userProfile.roles.includes(UserRoles.WORKER) &&
+                    userProfile.userProfile!.employeeNumber ===
+                        deliveryReception.value!.employeeNumberReceiver && (
+                        <div className="flex justify-center items-center">
+                            <p className="text-center mt-6 text-xl">
+                                Esta entrega-recepción no ha sido aceptada por
+                                los dos testigos
+                            </p>
+                        </div>
+                    )}
+
+                {deliveryReception.value!.status ===
+                    DeliveryReceptionStatusCodes.IN_PROCESS &&
                     userProfile.roles.includes(UserRoles.WITNESS) && (
                         <div className="flex justify-center items-center">
-                            <p className="text-center mt-36 text-xl">
+                            <p className="text-center mt-6 text-xl">
                                 Ya aceptaste esta entrega-recepción, pero aún
                                 falta que el otro testigo o el trabajador la
                                 acepte.
@@ -368,27 +610,29 @@ export const DeliveryReceptionInformation = () => {
 
                 {deliveryReception.value!.status ===
                     DeliveryReceptionStatusCodes.IN_PROCESS &&
-                    !userProfile.roles.includes(UserRoles.WITNESS) && (
+                    !userProfile.roles.includes(UserRoles.WITNESS) &&
+                    (userProfile.roles.includes(UserRoles.ZONE_MANAGER) ||
+                        (userProfile.roles.includes(UserRoles.WORKER) &&
+                            userProfile.userProfile!.employeeNumber ===
+                                deliveryReception.value!
+                                    .employeeNumberMaker)) && (
                         <div className="flex justify-center items-center">
-                            <p className="text-center mt-36 text-xl">
+                            <p className="text-center mt-6 text-xl">
                                 Esta entrega-recepción ya fue aceptada por al
-                                menos un usuario involucrado, pero aún faltan
-                                otros.
+                                menos un testigo, pero aún faltan otros.
                             </p>
                         </div>
                     )}
 
                 {deliveryReception.value!.status ===
-                    DeliveryReceptionStatusCodes.IN_PROCESS &&
-                    !userProfile.roles.includes(UserRoles.WITNESS) && (
-                        <div className="flex justify-center items-center">
-                            <p className="text-center mt-36 text-xl">
-                                Esta entrega-recepción ya fue aceptada por todos
-                                los usuarios involucrados, y ya se encuentra
-                                liberada.
-                            </p>
-                        </div>
-                    )}
+                    DeliveryReceptionStatusCodes.RELEASED && (
+                    <div className="flex justify-center items-center">
+                        <p className="text-center mt-6 text-xl">
+                            Esta entrega-recepción ya fue aceptada por todos los
+                            usuarios involucrados, y ya se encuentra liberada.
+                        </p>
+                    </div>
+                )}
             </div>
         </>
     );

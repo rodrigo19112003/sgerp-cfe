@@ -155,7 +155,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="generalData"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">Datos generales inválidos</p>
                     </div>
@@ -175,7 +175,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="programmaticStatus"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">Situación programática inválida</p>
                     </div>
@@ -266,7 +266,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="areaBudgetStatus"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">
                             Situación del presupuesto asignado al área inválida
@@ -360,7 +360,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="financialResources"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">Recursos financieros inválidos</p>
                     </div>
@@ -451,7 +451,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="materialResources"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">Recursos materiales inválidos</p>
                     </div>
@@ -542,7 +542,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="humanResources"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">Recursos humanos inválidos</p>
                     </div>
@@ -633,7 +633,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="procedureReport"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">
                             Informe de asuntos en trámite inválido
@@ -724,7 +724,7 @@ export const DeliveryReceptionForm = ({
                                 required: true,
                             })}
                             id="otherFacts"
-                            rows={5}
+                            rows={10}
                         />
                         <p className="error">Otros hechos inválidos</p>
                     </div>

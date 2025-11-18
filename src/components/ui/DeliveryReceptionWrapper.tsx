@@ -5,7 +5,7 @@ export const DeliveryReceptionWrapper = () => {
         <>
             <header className="flex flex-col items-center">
                 <h1 className="text-green-cfe text-center">
-                    ENTREGA-RECEPCIÓN PENDIENTE DE ACEPTAR
+                    DETALLE DE ENTREGA-RECEPCIÓN
                 </h1>
             </header>
             <main>

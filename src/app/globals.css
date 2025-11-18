@@ -125,6 +125,10 @@ body {
     outline: 5px solid #2563EB50;
   }
 
+  textarea {
+    resize: vertical;
+  }
+
   button, summary {
     cursor: pointer;
   }

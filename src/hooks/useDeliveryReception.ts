@@ -8,6 +8,7 @@ import { notify } from "@/utils/notifications";
 import { NotificationTypes } from "@/types/enums/notifications";
 import { NotificationInfo } from "@/types/types/components/notifications";
 import { CreateOrUpdateDeliveryReceptionErrorCodes } from "@/types/enums/error_codes";
+import EvidenceCategories from "@/types/enums/evidence_categories";
 
 type UseDeliveryReceptionProps = {
     deliveryReceptionId: number;
@@ -118,7 +119,7 @@ export function useDeliveryReception({
                 ) {
                     notificationInfo.title = "Entrega-recepción no encontrada";
                     notificationInfo.message =
-                        "No se pudo encontrar la entrega-recepción que se quiere actualizar o visualizar.";
+                        "No se pudo encontrar la entrega-recepción que se quiere aceptar, posiblemente fue eliminada por su creador.";
                     notificationInfo.type = NotificationTypes.ERROR;
                 }
             }
@@ -127,8 +128,54 @@ export function useDeliveryReception({
         }
     }, [deliveryReceptionId]);
 
+    const sendComment = useCallback(
+        async (text: string, categoryName: EvidenceCategories) => {
+            try {
+                const requestBody = { text, categoryName };
+                await sgerpCfeAPI.post(
+                    `/deliveries-receptions/${deliveryReceptionId}/comments`,
+                    requestBody
+                );
+
+                const notificationInfo: NotificationInfo = {
+                    title: "Comentario agregado",
+                    message: `El comentario se agregó correctamente a la entrega-recepción en la sección ${categoryName}`,
+                    type: NotificationTypes.SUCCESS,
+                };
+                notify(notificationInfo);
+            } catch (error) {
+                const notificationInfo: NotificationInfo = {
+                    title: "Servicio no disponible",
+                    message:
+                        "Por el momento el sistema no se encuentra disponible, por favor intente más tarde",
+                    type: NotificationTypes.ERROR,
+                };
+                if (
+                    isAxiosError(error) &&
+                    isClientErrorHTTPCode(Number(error.response?.status)) &&
+                    error.response?.status !== HttpStatusCodes.TOO_MANY_REQUESTS
+                ) {
+                    if (
+                        error.response?.data?.errorCode ===
+                        CreateOrUpdateDeliveryReceptionErrorCodes.DELIVERY_RECEPTION_NOT_FOUND
+                    ) {
+                        notificationInfo.title =
+                            "Entrega-recepción no encontrada";
+                        notificationInfo.message =
+                            "No se pudo encontrar la entrega-recepción a la que se quiere agregar el comentario, posiblemente fue eliminada por su creador.";
+                        notificationInfo.type = NotificationTypes.ERROR;
+                    }
+                }
+
+                notify(notificationInfo);
+            }
+        },
+        [deliveryReceptionId]
+    );
+
     return {
         deliveryReception,
         acceptDeliveryReception,
+        sendComment,
     };
 }

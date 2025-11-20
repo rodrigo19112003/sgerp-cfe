@@ -40,4 +40,15 @@ type DeliveryReceptionWithAllInformation = {
     status: DeliveryReceptionStatusCodes;
 };
 
-export type { DeliveryReception, DeliveryReceptionWithAllInformation, IFile };
+type Comment = {
+    id: number;
+    text: string;
+    zoneManagerEmployeeNumberAndFullName: string;
+};
+
+export type {
+    DeliveryReception,
+    DeliveryReceptionWithAllInformation,
+    Comment,
+    IFile,
+};

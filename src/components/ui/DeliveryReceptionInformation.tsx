@@ -337,37 +337,52 @@ ${deliveryReception.value.generalData || ""}`
                             {deliveryReception.value!.generalData}
                         </p>
                     </div>
-                    <label htmlFor="generalDataComment" className="mt-4 block">
-                        Escribe un comentario sobre los Datos Generales (si lo
-                        deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="generalDataComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendGeneralDataCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendGeneralDataCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "generalDataComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="generalDataComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre los Datos
+                                    Generales (si lo deseas) antes de querer
+                                    enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="generalDataComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendGeneralDataCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendGeneralDataCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "generalDataComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.DATA
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "generalDataComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -402,40 +417,52 @@ ${deliveryReception.value.generalData || ""}`
                             Descargar evidencia
                         </TernaryButton>
                     </div>
-                    <label
-                        htmlFor="programmaticStatusComment"
-                        className="mt-4 block"
-                    >
-                        Escribe un comentario sobre la Situación Programática
-                        (si lo deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="programmaticStatusComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendProgrammaticStatusCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendProgrammaticStatusCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "programmaticStatusComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.PROGRAMMATIC
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="programmaticStatusComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre la Situación
+                                    Programática (si lo deseas) antes de querer
+                                    enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="programmaticStatusComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendProgrammaticStatusCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendProgrammaticStatusCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "programmaticStatusComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.PROGRAMMATIC
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "programmaticStatusComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -471,40 +498,52 @@ ${deliveryReception.value.generalData || ""}`
                             Descargar evidencia
                         </TernaryButton>
                     </div>
-                    <label
-                        htmlFor="areaBudgetStatusComment"
-                        className="mt-4 block"
-                    >
-                        Escribe un comentario sobre la Situación del Presupuesto
-                        Asignado al Área (si lo deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="areaBudgetStatusComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendAreaBudgetStatusCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendAreaBudgetStatusCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "areaBudgetStatusComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="areaBudgetStatusComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre la Situación del
+                                    Presupuesto Asignado al Área (si lo deseas)
+                                    antes de querer enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="areaBudgetStatusComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendAreaBudgetStatusCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendAreaBudgetStatusCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "areaBudgetStatusComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.BUDGET
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "areaBudgetStatusComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -539,40 +578,52 @@ ${deliveryReception.value.generalData || ""}`
                             Descargar evidencia
                         </TernaryButton>
                     </div>
-                    <label
-                        htmlFor="financialResourcesComment"
-                        className="mt-4 block"
-                    >
-                        Escribe un comentario sobre los Recursos Financieros (si
-                        lo deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="financialResourcesComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendFinancialResourcesCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendFinancialResourcesCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "financialResourcesComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="financialResourcesComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre los Recursos
+                                    Financieros (si lo deseas) antes de querer
+                                    enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="financialResourcesComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendFinancialResourcesCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendFinancialResourcesCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "financialResourcesComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.FINANCE
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "financialResourcesComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -607,40 +658,52 @@ ${deliveryReception.value.generalData || ""}`
                             Descargar evidencia
                         </TernaryButton>
                     </div>
-                    <label
-                        htmlFor="materialResourcesComment"
-                        className="mt-4 block"
-                    >
-                        Escribe un comentario sobre los Recursos Materiales (si
-                        lo deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="materialResourcesComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendMaterialResourcesCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendMaterialResourcesCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "materialResourcesComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="materialResourcesComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre los Recursos
+                                    Materiales (si lo deseas) antes de querer
+                                    enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="materialResourcesComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendMaterialResourcesCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendMaterialResourcesCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "materialResourcesComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.MATERIAL
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "materialResourcesComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -673,40 +736,52 @@ ${deliveryReception.value.generalData || ""}`
                             Descargar evidencia
                         </TernaryButton>
                     </div>
-                    <label
-                        htmlFor="humanResourcesComment"
-                        className="mt-4 block"
-                    >
-                        Escribe un comentario sobre los Recursos Humanos (si lo
-                        deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="humanResourcesComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendHumanResourcesCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendHumanResourcesCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "humanResourcesComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="humanResourcesComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre los Recursos
+                                    Humanos (si lo deseas) antes de querer
+                                    enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="humanResourcesComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendHumanResourcesCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendHumanResourcesCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "humanResourcesComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.HUMAN
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "humanResourcesComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -739,40 +814,52 @@ ${deliveryReception.value.generalData || ""}`
                             Descargar evidencia
                         </TernaryButton>
                     </div>
-                    <label
-                        htmlFor="procedureReportComment"
-                        className="mt-4 block"
-                    >
-                        Escribe un comentario sobre el Informe de Asuntos en
-                        Trámite (si lo deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="procedureReportComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendProcedureReportCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendProcedureReportCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "procedureReportComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="procedureReportComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre el Informe de
+                                    Asuntos en Trámite (si lo deseas) antes de
+                                    querer enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="procedureReportComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendProcedureReportCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendProcedureReportCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "procedureReportComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.REPORT
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "procedureReportComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <details className="mb-4">
@@ -782,37 +869,51 @@ ${deliveryReception.value.generalData || ""}`
                             {deliveryReception.value!.otherFacts}
                         </p>
                     </div>
-                    <label htmlFor="otherFactsComment" className="mt-4 block">
-                        Escribe un comentario sobre los Otros Hechos (si lo
-                        deseas) antes de querer enviarlo
-                    </label>
-                    <input
-                        type="text"
-                        id="otherFactsComment"
-                        onInput={(e) => {
-                            listenCommentInput(
-                                e as React.FormEvent<HTMLInputElement>,
-                                "sendOtherFactsCommentButton"
-                            );
-                        }}
-                    />
-                    <div className="flex justify-end gap-4 mt-2">
-                        <SecondaryButton
-                            id="sendOtherFactsCommentButton"
-                            onClick={() => {
-                                sendComment(
-                                    (
-                                        document.getElementById(
-                                            "otherFactsComment"
-                                        ) as HTMLInputElement
-                                    ).value,
-                                    EvidenceCategories.DATA
-                                );
-                            }}
-                        >
-                            Enviar comentario
-                        </SecondaryButton>
-                    </div>
+                    {deliveryReception.value!.status ===
+                        DeliveryReceptionStatusCodes.PENDING &&
+                        !userProfile.roles.includes(UserRoles.WORKER) && (
+                            <>
+                                <label
+                                    htmlFor="otherFactsComment"
+                                    className="mt-4 block"
+                                >
+                                    Escribe un comentario sobre los Otros Hechos
+                                    (si lo deseas) antes de querer enviarlo
+                                </label>
+                                <input
+                                    type="text"
+                                    id="otherFactsComment"
+                                    onInput={(e) => {
+                                        listenCommentInput(
+                                            e as React.FormEvent<HTMLInputElement>,
+                                            "sendOtherFactsCommentButton"
+                                        );
+                                    }}
+                                />
+                                <div className="flex justify-end gap-4 mt-2">
+                                    <SecondaryButton
+                                        id="sendOtherFactsCommentButton"
+                                        onClick={() => {
+                                            sendComment(
+                                                (
+                                                    document.getElementById(
+                                                        "otherFactsComment"
+                                                    ) as HTMLInputElement
+                                                ).value,
+                                                EvidenceCategories.OTHER
+                                            );
+                                            (
+                                                document.getElementById(
+                                                    "otherFactsComment"
+                                                ) as HTMLInputElement
+                                            ).value = "";
+                                        }}
+                                    >
+                                        Enviar comentario
+                                    </SecondaryButton>
+                                </div>
+                            </>
+                        )}
                 </details>
 
                 <div className="flex justify-center mt-6">

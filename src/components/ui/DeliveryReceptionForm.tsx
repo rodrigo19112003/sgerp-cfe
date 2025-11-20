@@ -10,6 +10,8 @@ import { useDeliveryReceptionForm } from "@/hooks/useDeliveryReceptionForm";
 import type { DeliveryReceptionInformationForm } from "@/hooks/useDeliveryReceptionForm";
 import { EMPLOYEE_NUMBER_PATTERN } from "@/utils/regexp";
 import { IFile } from "@/types/types/model/deliveries_receptions";
+import EvidenceCategories from "@/types/enums/evidence_categories";
+import { CommentsWrapper } from "./CommentsWrapper";
 
 type DeliveryReceptionFormProps = {
     isEdition: boolean;
@@ -123,6 +125,23 @@ export const DeliveryReceptionForm = ({
         setIsModalOpen(false);
     }, []);
 
+    const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+    const [commentsCategory, setCommentsCategory] =
+        useState<EvidenceCategories | null>(null);
+
+    const handleOpenComments = useCallback(
+        (categoryName: EvidenceCategories) => {
+            setCommentsCategory(categoryName);
+            setIsCommentsOpen(true);
+        },
+        []
+    );
+
+    const handleCloseComments = useCallback(() => {
+        setIsCommentsOpen(false);
+        setCommentsCategory(null);
+    }, []);
+
     return isEdition && deliveryReception.loading ? (
         <div className="flex justify-center items-center h-full">
             <p className="text-center mt-36 text-2xl">
@@ -150,6 +169,16 @@ export const DeliveryReceptionForm = ({
                         }`}
                     >
                         <label htmlFor="generalData">DATOS GENERALES</label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(EvidenceCategories.DATA)
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("generalData", {
                                 required: true,
@@ -170,6 +199,18 @@ export const DeliveryReceptionForm = ({
                         <label htmlFor="programmaticStatus">
                             I. SITUACIÓN PROGRAMÁTICA
                         </label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(
+                                        EvidenceCategories.PROGRAMMATIC
+                                    )
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("programmaticStatus", {
                                 required: true,
@@ -261,6 +302,18 @@ export const DeliveryReceptionForm = ({
                         <label htmlFor="areaBudgetStatus">
                             II. SITUACIÓN DEL PRESUPUESTO ASIGNADO AL ÁREA
                         </label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(
+                                        EvidenceCategories.BUDGET
+                                    )
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("areaBudgetStatus", {
                                 required: true,
@@ -355,6 +408,18 @@ export const DeliveryReceptionForm = ({
                         <label htmlFor="financialResources">
                             III. RECURSOS FINANCIEROS
                         </label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(
+                                        EvidenceCategories.FINANCE
+                                    )
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("financialResources", {
                                 required: true,
@@ -446,6 +511,18 @@ export const DeliveryReceptionForm = ({
                         <label htmlFor="materialResources">
                             IV. RECURSOS MATERIALES
                         </label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(
+                                        EvidenceCategories.MATERIAL
+                                    )
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("materialResources", {
                                 required: true,
@@ -537,6 +614,16 @@ export const DeliveryReceptionForm = ({
                         <label htmlFor="humanResources">
                             V. RECURSOS HUMANOS
                         </label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(EvidenceCategories.HUMAN)
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("humanResources", {
                                 required: true,
@@ -628,6 +715,18 @@ export const DeliveryReceptionForm = ({
                         <label htmlFor="procedureReport">
                             VI. INFORME DE ASUNTOS EN TRÁMITE
                         </label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(
+                                        EvidenceCategories.REPORT
+                                    )
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("procedureReport", {
                                 required: true,
@@ -719,6 +818,16 @@ export const DeliveryReceptionForm = ({
                         }`}
                     >
                         <label htmlFor="otherFacts">VII. OTROS HECHOS</label>
+                        <div className="flex justify-end">
+                            <TernaryButton
+                                type="button"
+                                onClick={() =>
+                                    handleOpenComments(EvidenceCategories.OTHER)
+                                }
+                            >
+                                Ver comentarios
+                            </TernaryButton>
+                        </div>
                         <textarea
                             {...register("otherFacts", {
                                 required: true,
@@ -766,6 +875,15 @@ export const DeliveryReceptionForm = ({
                     onClose={cancelCancel}
                     onConfirm={confirmCancel}
                 />
+
+                {commentsCategory && (
+                    <CommentsWrapper
+                        handleCloseModal={handleCloseComments}
+                        categoryName={commentsCategory!}
+                        deliveryReceptionId={deliveryReceptionIdNumber}
+                        isOpen={isCommentsOpen}
+                    />
+                )}
 
                 <div className="flex justify-end gap-4 mt-5">
                     <CancelButton

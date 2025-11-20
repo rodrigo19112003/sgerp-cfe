@@ -286,6 +286,8 @@ ${deliveryReception.value.generalData || ""}`
         }
     };
 
+    const [buttonDisabled, setButtonDisabled] = useState(true);
+
     const listenCommentInput = (
         e: React.FormEvent<HTMLInputElement>,
         elementId: string
@@ -294,7 +296,11 @@ ${deliveryReception.value.generalData || ""}`
         const button = document.getElementById(
             elementId
         ) as HTMLButtonElement | null;
-        if (button) button.disabled = comment.trim().length === 0;
+        if (button && comment.trim().length === 0) {
+            setButtonDisabled(true);
+        } else if (button) {
+            setButtonDisabled(false);
+        }
     };
 
     return deliveryReception.loading ? (
@@ -362,6 +368,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendGeneralDataCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (
@@ -442,6 +449,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendProgrammaticStatusCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (
@@ -523,6 +531,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendAreaBudgetStatusCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (
@@ -603,6 +612,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendFinancialResourcesCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (
@@ -683,6 +693,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendMaterialResourcesCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (
@@ -761,6 +772,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendHumanResourcesCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (
@@ -829,6 +841,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="procedureReportComment"
+                                    disabled={buttonDisabled}
                                     onInput={(e) => {
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
@@ -893,6 +906,7 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendOtherFactsCommentButton"
+                                        disabled={buttonDisabled}
                                         onClick={() => {
                                             sendComment(
                                                 (

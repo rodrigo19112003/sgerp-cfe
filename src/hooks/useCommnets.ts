@@ -51,7 +51,7 @@ export function useComments({
     const loadComments = useCallback(async () => {
         try {
             const { data: comments } = await sgerpCfeAPI.get(
-                `/deliveries-receptions/${deliveryReceptionId}/comments/${categoryName}`
+                `/deliveries-receptions/${deliveryReceptionId}/comments?categoryName=${categoryName}`
             );
 
             finishLoadingComments(comments);

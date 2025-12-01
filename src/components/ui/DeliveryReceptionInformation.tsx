@@ -286,7 +286,40 @@ ${deliveryReception.value.generalData || ""}`
         }
     };
 
-    const [buttonDisabled, setButtonDisabled] = useState(true);
+    const [generalDataComment, setGeneralDataComment] = useState("");
+    const [programmaticStatusComment, setProgrammaticStatusComment] =
+        useState("");
+    const [areaBudgetStatusComment, setAreaBudgetStatusComment] = useState("");
+    const [financialResourcesComment, setFinancialResourcesComment] =
+        useState("");
+    const [materialResourcesComment, setMaterialResourcesComment] =
+        useState("");
+    const [humanResourcesComment, setHumanResourcesComment] = useState("");
+    const [procedureReportComment, setProcedureReportComment] = useState("");
+    const [otherFactsComment, setOtherFactsComment] = useState("");
+
+    const [generalDataButtonDisabled, setGeneralDataButtonDisabled] =
+        useState(true);
+    const [
+        programmaticStatusButtonDisabled,
+        setProgrammaticStatusButtonDisabled,
+    ] = useState(true);
+    const [areaBudgetStatusButtonDisabled, setAreaBudgetStatusButtonDisabled] =
+        useState(true);
+    const [
+        financialResourcesButtonDisabled,
+        setFinancialResourcesButtonDisabled,
+    ] = useState(true);
+    const [
+        materialResourcesButtonDisabled,
+        setMaterialResourcesButtonDisabled,
+    ] = useState(true);
+    const [humanResourcesButtonDisabled, setHumanResourcesButtonDisabled] =
+        useState(true);
+    const [procedureReportButtonDisabled, setProcedureReportButtonDisabled] =
+        useState(true);
+    const [otherFactsButtonDisabled, setOtherFactsButtonDisabled] =
+        useState(true);
 
     const listenCommentInput = (
         e: React.FormEvent<HTMLInputElement>,
@@ -296,10 +329,60 @@ ${deliveryReception.value.generalData || ""}`
         const button = document.getElementById(
             elementId
         ) as HTMLButtonElement | null;
-        if (button && comment.trim().length === 0) {
-            setButtonDisabled(true);
+        if (button && comment.trim() === "") {
+            switch (elementId) {
+                case "sendGeneralDataCommentButton":
+                    setGeneralDataButtonDisabled(true);
+                    break;
+                case "sendProgrammaticStatusCommentButton":
+                    setProgrammaticStatusButtonDisabled(true);
+                    break;
+                case "sendAreaBudgetStatusCommentButton":
+                    setAreaBudgetStatusButtonDisabled(true);
+                    break;
+                case "sendFinancialResourcesCommentButton":
+                    setFinancialResourcesButtonDisabled(true);
+                    break;
+                case "sendMaterialResourcesCommentButton":
+                    setMaterialResourcesButtonDisabled(true);
+                    break;
+                case "sendHumanResourcesCommentButton":
+                    setHumanResourcesButtonDisabled(true);
+                    break;
+                case "sendProcedureReportCommentButton":
+                    setProcedureReportButtonDisabled(true);
+                    break;
+                case "sendOtherFactsCommentButton":
+                    setOtherFactsButtonDisabled(true);
+                    break;
+            }
         } else if (button) {
-            setButtonDisabled(false);
+            switch (elementId) {
+                case "sendGeneralDataCommentButton":
+                    setGeneralDataButtonDisabled(false);
+                    break;
+                case "sendProgrammaticStatusCommentButton":
+                    setProgrammaticStatusButtonDisabled(false);
+                    break;
+                case "sendAreaBudgetStatusCommentButton":
+                    setAreaBudgetStatusButtonDisabled(false);
+                    break;
+                case "sendFinancialResourcesCommentButton":
+                    setFinancialResourcesButtonDisabled(false);
+                    break;
+                case "sendMaterialResourcesCommentButton":
+                    setMaterialResourcesButtonDisabled(false);
+                    break;
+                case "sendHumanResourcesCommentButton":
+                    setHumanResourcesButtonDisabled(false);
+                    break;
+                case "sendProcedureReportCommentButton":
+                    setProcedureReportButtonDisabled(false);
+                    break;
+                case "sendOtherFactsCommentButton":
+                    setOtherFactsButtonDisabled(false);
+                    break;
+            }
         }
     };
 
@@ -358,7 +441,9 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="generalDataComment"
-                                    onInput={(e) => {
+                                    value={generalDataComment}
+                                    onChange={(e) => {
+                                        setGeneralDataComment(e.target.value);
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendGeneralDataCommentButton"
@@ -368,21 +453,14 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendGeneralDataCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={generalDataButtonDisabled}
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "generalDataComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                generalDataComment,
                                                 EvidenceCategories.DATA
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "generalDataComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setGeneralDataComment("");
+                                            setGeneralDataButtonDisabled(true);
                                         }}
                                     >
                                         Enviar comentario
@@ -439,7 +517,11 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="programmaticStatusComment"
-                                    onInput={(e) => {
+                                    value={programmaticStatusComment}
+                                    onChange={(e) => {
+                                        setProgrammaticStatusComment(
+                                            e.target.value
+                                        );
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendProgrammaticStatusCommentButton"
@@ -449,21 +531,18 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendProgrammaticStatusCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={
+                                            programmaticStatusButtonDisabled
+                                        }
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "programmaticStatusComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                programmaticStatusComment,
                                                 EvidenceCategories.PROGRAMMATIC
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "programmaticStatusComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setProgrammaticStatusComment("");
+                                            setProgrammaticStatusButtonDisabled(
+                                                true
+                                            );
                                         }}
                                     >
                                         Enviar comentario
@@ -521,7 +600,11 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="areaBudgetStatusComment"
-                                    onInput={(e) => {
+                                    value={areaBudgetStatusComment}
+                                    onChange={(e) => {
+                                        setAreaBudgetStatusComment(
+                                            e.target.value
+                                        );
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendAreaBudgetStatusCommentButton"
@@ -531,21 +614,18 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendAreaBudgetStatusCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={
+                                            areaBudgetStatusButtonDisabled
+                                        }
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "areaBudgetStatusComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                areaBudgetStatusComment,
                                                 EvidenceCategories.BUDGET
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "areaBudgetStatusComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setAreaBudgetStatusComment("");
+                                            setAreaBudgetStatusButtonDisabled(
+                                                true
+                                            );
                                         }}
                                     >
                                         Enviar comentario
@@ -602,7 +682,11 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="financialResourcesComment"
-                                    onInput={(e) => {
+                                    value={financialResourcesComment}
+                                    onChange={(e) => {
+                                        setFinancialResourcesComment(
+                                            e.target.value
+                                        );
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendFinancialResourcesCommentButton"
@@ -612,21 +696,18 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendFinancialResourcesCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={
+                                            financialResourcesButtonDisabled
+                                        }
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "financialResourcesComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                financialResourcesComment,
                                                 EvidenceCategories.FINANCE
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "financialResourcesComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setFinancialResourcesComment("");
+                                            setFinancialResourcesButtonDisabled(
+                                                true
+                                            );
                                         }}
                                     >
                                         Enviar comentario
@@ -683,7 +764,11 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="materialResourcesComment"
-                                    onInput={(e) => {
+                                    value={materialResourcesComment}
+                                    onChange={(e) => {
+                                        setMaterialResourcesComment(
+                                            e.target.value
+                                        );
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendMaterialResourcesCommentButton"
@@ -693,21 +778,18 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendMaterialResourcesCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={
+                                            materialResourcesButtonDisabled
+                                        }
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "materialResourcesComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                materialResourcesComment,
                                                 EvidenceCategories.MATERIAL
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "materialResourcesComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setMaterialResourcesComment("");
+                                            setMaterialResourcesButtonDisabled(
+                                                true
+                                            );
                                         }}
                                     >
                                         Enviar comentario
@@ -762,7 +844,11 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="humanResourcesComment"
-                                    onInput={(e) => {
+                                    value={humanResourcesComment}
+                                    onChange={(e) => {
+                                        setHumanResourcesComment(
+                                            e.target.value
+                                        );
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendHumanResourcesCommentButton"
@@ -772,21 +858,16 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendHumanResourcesCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={humanResourcesButtonDisabled}
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "humanResourcesComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                humanResourcesComment,
                                                 EvidenceCategories.HUMAN
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "humanResourcesComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setHumanResourcesComment("");
+                                            setHumanResourcesButtonDisabled(
+                                                true
+                                            );
                                         }}
                                     >
                                         Enviar comentario
@@ -841,31 +922,26 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="procedureReportComment"
-                                    disabled={buttonDisabled}
-                                    onInput={(e) => {
-                                        listenCommentInput(
-                                            e as React.FormEvent<HTMLInputElement>,
-                                            "sendProcedureReportCommentButton"
+                                    value={procedureReportComment}
+                                    onChange={(e) => {
+                                        setProcedureReportComment(
+                                            e.target.value
                                         );
                                     }}
                                 />
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendProcedureReportCommentButton"
+                                        disabled={procedureReportButtonDisabled}
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "procedureReportComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                procedureReportComment,
                                                 EvidenceCategories.REPORT
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "procedureReportComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setProcedureReportComment("");
+                                            setProcedureReportButtonDisabled(
+                                                true
+                                            );
                                         }}
                                     >
                                         Enviar comentario
@@ -896,7 +972,9 @@ ${deliveryReception.value.generalData || ""}`
                                 <input
                                     type="text"
                                     id="otherFactsComment"
-                                    onInput={(e) => {
+                                    value={otherFactsComment}
+                                    onChange={(e) => {
+                                        setOtherFactsComment(e.target.value);
                                         listenCommentInput(
                                             e as React.FormEvent<HTMLInputElement>,
                                             "sendOtherFactsCommentButton"
@@ -906,21 +984,14 @@ ${deliveryReception.value.generalData || ""}`
                                 <div className="flex justify-end gap-4 mt-2">
                                     <SecondaryButton
                                         id="sendOtherFactsCommentButton"
-                                        disabled={buttonDisabled}
+                                        disabled={otherFactsButtonDisabled}
                                         onClick={() => {
                                             sendComment(
-                                                (
-                                                    document.getElementById(
-                                                        "otherFactsComment"
-                                                    ) as HTMLInputElement
-                                                ).value,
+                                                otherFactsComment,
                                                 EvidenceCategories.OTHER
                                             );
-                                            (
-                                                document.getElementById(
-                                                    "otherFactsComment"
-                                                ) as HTMLInputElement
-                                            ).value = "";
+                                            setOtherFactsComment("");
+                                            setOtherFactsButtonDisabled(true);
                                         }}
                                     >
                                         Enviar comentario
